@@ -1,0 +1,26 @@
+# --- MADDPG  NSspecific parameters ---
+
+runner: "episode"
+
+buffer_size: 50000
+# update the target network every {} episodes
+target_update_interval_or_tau: 0.01
+
+obs_agent_id: False
+obs_last_action: False
+obs_individual_obs: False
+
+
+# use the maddpg_learner to train
+agent: "rnn_ns"
+mac: "maddpg_mac"
+reg: 0.001
+batch_size: 16
+lr: 0.0005
+standardise_rewards: True
+use_rnn: False
+learner: "maddpg_learner"
+agent_output_type: "pi_logits"
+hidden_dim: 128
+critic_type: "maddpg_critic_ns"
+name: "maddpg_ns"

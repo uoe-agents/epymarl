@@ -1,0 +1,29 @@
+# --- QMIX specific parameters ---
+
+# use epsilon greedy action selector
+action_selector: "epsilon_greedy"
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+
+runner: "episode"
+
+buffer_size: 5000
+
+# update the target network every {} episodes
+target_update_interval: 200
+
+# use the Q_Learner to train
+agent_output_type: "q"
+learner: "qtran_learner"
+double_q: True
+mixer: "qtran_base"
+mixing_embed_dim: 64
+qtran_arch: "qtran_paper"
+
+opt_loss: 1
+nopt_min_loss: 0.1
+
+network_size: small
+
+name: "qtran"
