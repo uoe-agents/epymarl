@@ -1,40 +1,42 @@
-```diff
-- Dec 4th - Updated to use SMAC V1. 
+# (Extended) Python MARL framework - EPyMARL
+
+EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
+- Additional algorithms (IA2C, IPPO, MADDPG, MA3C and MAPPO)
+- Support for [Gym](https://github.com/openai/gym) environments (on top of the existing SMAC support)
+- Option for no-parameter sharing between agents (original PyMARL only allowed for parameter sharing)
+- Flexibility with extra implementation details (e.g. hard/soft updates, reward standarization, and more)
+
+## Installation & Run instructions
+
+For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers.
+To install the codebase, clone this repo and install the `requirements.txt`.  
+
+### Using A Gym Environment
+
+EPyMARL supports environments that have been registered with Gym. 
+The only difference with the Gym framework would be that the returned rewards should be a tuple (one reward for each agent). In this cooperative framework we sum these rewards together.
+
+Environments that are supported out of the box are the ones that are registered in Gym automatically. Examples are: [Level-Based Foraging](https://github.com/semitable/lb-foraging) and [RWARE](https://github.com/semitable/robotic-warehouse). 
+
+To register a custom environment with Gym, use the template below (taken from Level-Based Foraging).
+```python
+from gym.envs.registration import registry, register, make, spec
+register(
+  id="Foraging-8x8-2p-3f-v0",                     # Environment ID.
+  entry_point="lbforaging.foraging:ForagingEnv",  # The entry point for the environment class
+  kwargs={
+            ...                                   # Arguments that go to ForagingEnv's __init__ function.
+        },
+    )
 ```
 
-# Python MARL framework
+## Run an experiment on a Gym environment
 
-PyMARL is [WhiRL](http://whirl.cs.ox.ac.uk)'s framework for deep multi-agent reinforcement learning and includes implementations of the following algorithms:
-- [**QMIX**: QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1803.11485)
-- [**COMA**: Counterfactual Multi-Agent Policy Gradients](https://arxiv.org/abs/1705.08926)
-- [**VDN**: Value-Decomposition Networks For Cooperative Multi-Agent Learning](https://arxiv.org/abs/1706.05296) 
-- [**IQL**: Independent Q-Learning](https://arxiv.org/abs/1511.08779)
-- [**QTRAN**: QTRAN: Learning to Factorize with Transformation for Cooperative Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1905.05408)
-
-PyMARL is written in PyTorch and uses [SMAC](https://github.com/oxwhirl/smac) as its environment.
-
-## Installation instructions
-
-Build the Dockerfile using 
 ```shell
-cd docker
-bash build.sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v0"
 ```
+ In the above command `--env-config=gymma` (in constrast to `sc2` will use a Gym compatible wrapper). `env_args.time_limit=50` sets the maximum episode length to 50 and `env_args.key="..."` provides the Gym's environment ID. In the ID, the `lbforaging:` part is the module name (i.e. `import lbforaging` will run automatically).
 
-Set up StarCraft II and SMAC:
-```shell
-bash install_sc2.sh
-```
-
-This will download SC2 into the 3rdparty folder and copy the maps necessary to run over.
-
-The requirements.txt file can be used to install the necessary packages into a virtual environment (not recomended).
-
-## Run an experiment 
-
-```shell
-python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=2s3z
-```
 
 The config files act as defaults for an algorithm or environment. 
 
@@ -42,14 +44,7 @@ They are all located in `src/config`.
 `--config` refers to the config files in `src/config/algs`
 `--env-config` refers to the config files in `src/config/envs`
 
-To run experiments using the Docker container:
-```shell
-bash run.sh $GPU python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=2s3z
-```
-
 All results will be stored in the `Results` folder.
-
-The previous config files used for the SMAC Beta have the suffix `_beta`.
 
 ## Saving and loading learnt models
 
@@ -61,23 +56,7 @@ You can save the learnt models to disk by setting `save_model = True`, which is 
 
 Learnt models can be loaded using the `checkpoint_path` parameter, after which the learning will proceed from the corresponding timestep. 
 
-## Watching StarCraft II replays
-
-`save_replay` option allows saving replays of models which are loaded using `checkpoint_path`. Once the model is successfully loaded, `test_nepisode` number of episodes are run on the test mode and a .SC2Replay file is saved in the Replay directory of StarCraft II. Please make sure to use the episode runner if you wish to save a replay, i.e., `runner=episode`. The name of the saved replay file starts with the given `env_args.save_replay_prefix` (map_name if empty), followed by the current timestamp. 
-
-The saved replays can be watched by double-clicking on them or using the following command:
-
-```shell
-python -m pysc2.bin.play --norender --rgb_minimap_size 0 --replay NAME.SC2Replay
-```
-
-**Note:** Replays cannot be watched using the Linux version of StarCraft II. Please use either the Mac or Windows version of the StarCraft II client.
-
-## Documentation/Support
-
-Documentation is a little sparse at the moment (but will improve!). Please raise an issue in this repo, or email [Tabish](mailto:tabish.rashid@cs.ox.ac.uk)
-
-## Citing PyMARL 
+## Citing PyMARL and EPyMARL
 
 If you use PyMARL in your research, please cite the [SMAC paper](https://arxiv.org/abs/1902.04043).
 
@@ -96,5 +75,5 @@ In BibTeX format:
 ```
 
 ## License
-
-Code licensed under the Apache License v2.0
+All the source code that has been taken from the PyMARL repository was licensed (and remains so) under the Apache License v2.0 (included in `LICENSE` file).
+Any new code is also licensed under the Apache License v2.0
