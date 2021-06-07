@@ -29,7 +29,7 @@ entropy_coef: 0.01
 standardise_rewards: True
 use_rnn: False
 q_nstep: 5 # 1 corresponds to normal r + gammaV
-critic_type: "ia2c_critic"
+critic_type: "ac_critic"
 epochs: 4
 eps_clip: 0.2
 name: "ippo"

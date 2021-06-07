@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class IA2CCritic(nn.Module):
+class ACCritic(nn.Module):
     def __init__(self, scheme, args):
-        super(IA2CCritic, self).__init__()
+        super(ACCritic, self).__init__()
 
         self.args = args
         self.n_actions = args.n_actions

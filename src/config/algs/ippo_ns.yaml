@@ -31,7 +31,7 @@ use_rnn: False
 epochs: 4
 eps_clip: 0.2
 q_nstep: 5 # 1 corresponds to normal r + gammaV
-critic_type: ia2c_critic_ns
+critic_type: "ac_critic_ns"
 name: "ippo_ns"
 
 t_max: 20050000

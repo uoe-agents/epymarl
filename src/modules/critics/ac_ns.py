@@ -4,9 +4,9 @@ import torch.nn.functional as F
 from modules.critics.mlp import MLP
 
 
-class IA2CCriticNS(nn.Module):
+class ACCriticNS(nn.Module):
     def __init__(self, scheme, args):
-        super(IA2CCriticNS, self).__init__()
+        super(ACCriticNS, self).__init__()
 
         self.args = args
         self.n_actions = args.n_actions
