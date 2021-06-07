@@ -1,0 +1,52 @@
+exclude: null
+grid-search:
+
+  "--config":
+    - "iql"
+    - "iql_ns"
+
+  lr:
+    - 0.0001
+    - 0.0003
+    - 0.0005
+
+  standardise_rewards:
+    - True
+
+  use_rnn:
+    - False
+
+  target_update_interval_or_tau:
+    - 200
+    - 0.01
+
+  hidden_dim:
+    - 64
+    - 128
+
+  evaluation_epsilon:
+    - 0.0
+    - 0.05
+
+  epsilon_anneal_time:
+    - 50000
+    - 200000
+
+  t_max:
+    - 2050000
+  test_nepisode:
+    - 100
+  test_interval:
+    - 25000
+  log_interval:
+    - 25000
+  save_model_interval:
+    - 50000
+  save_model:
+    - false
+    
+grid-search-groups:
+  env0:
+    - "--env-config": "gymma"
+    - env_args.key: lbforaging:Foraging-8x8-2p-3f-v0
+    - env_args.time_limit: 25
