@@ -26,8 +26,8 @@ The following files have been added compared to the original PyMARL codebase:
 - src/modules/critics/centralV.py
 - src/modules/critics/centralV_ns.py
 - src/modules/critics/coma_ns.py
-- src/modules/critics/ia2c.py
-- src/modules/critics/ia2c_ns.py
+- src/modules/critics/ac.py
+- src/modules/critics/ac_ns.py
 - src/modules/critics/maddpg.py
 - src/modules/critics/maddpg_ns.py
 - src/modules/critics/mlp.py
