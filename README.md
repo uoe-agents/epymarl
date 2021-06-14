@@ -58,7 +58,24 @@ Learnt models can be loaded using the `checkpoint_path` parameter, after which t
 
 ## Citing PyMARL and EPyMARL
 
-If you use PyMARL in your research, please cite the [SMAC paper](https://arxiv.org/abs/1902.04043).
+The Extended PyMARL (EPyMARL) codebase was discussed in [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869).
+
+*Georgios Papoudakis, Filippos Christianos, Lukas Schäfer, & Stefano V. Albrecht. Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks, CoRR abs/2006.07869, 2021*
+
+In BibTeX format:
+
+```tex
+@misc{papoudakis2021benchmarking,
+  title={Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks}, 
+  author={Georgios Papoudakis and Filippos Christianos and Lukas Sch\"afer and Stefano V. Albrecht},
+  year={2021},
+  eprint={2006.07869},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG}
+}
+```
+
+If you use the original PyMARL in your research, please cite the [SMAC paper](https://arxiv.org/abs/1902.04043).
 
 *M. Samvelyan, T. Rashid, C. Schroeder de Witt, G. Farquhar, N. Nardelli, T.G.J. Rudner, C.-M. Hung, P.H.S. Torr, J. Foerster, S. Whiteson. The StarCraft Multi-Agent Challenge, CoRR abs/1902.04043, 2019.*
 
