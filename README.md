@@ -1,7 +1,7 @@
 # Extended Python MARL framework - EPyMARL
 
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
-- Additional algorithms (IA2C, IPPO, MADDPG, MA3C and MAPPO)
+- Additional algorithms (IA2C, IPPO, MADDPG, MAA2C and MAPPO)
 - Support for [Gym](https://github.com/openai/gym) environments (on top of the existing SMAC support)
 - Option for no-parameter sharing between agents (original PyMARL only allowed for parameter sharing)
 - Flexibility with extra implementation details (e.g. hard/soft updates, reward standarization, and more)
