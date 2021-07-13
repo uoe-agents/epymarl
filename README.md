@@ -48,7 +48,7 @@ All results will be stored in the `Results` folder.
 
 ## Run a hyperparameter search
 
-We include a script named `search.py` which read a search configuration file (e.g. the included `search.config.example.yaml`) and run a hyperparameter search. The script can be run using
+We include a script named `search.py` which reads a search configuration file (e.g. the included `search.config.example.yaml`) and runs a hyperparameter search in one or more tasks. The script can be run using
 ```shell
 python search.py run --config=search.config.example.yaml --seeds 5 locally
 ```
