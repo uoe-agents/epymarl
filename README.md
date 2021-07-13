@@ -46,6 +46,18 @@ They are all located in `src/config`.
 
 All results will be stored in the `Results` folder.
 
+## Run a hyperparameter search
+
+We include a script named `search.py` which read a search configuration file (e.g. the included `search.config.example.yaml`) and run a hyperparameter search. The script can be run using
+```shell
+python search.py run --config=search.config.example.yaml --seeds 5 locally
+```
+In a cluster environment where one run should go to a single process, it can also be called in a batch script like:
+```shell
+python search.py run --config=search.config.example.yaml --seeds 5 single 1
+```
+where the 1 is an index to the particular hyperparameter configuration and can take values from 1 to the number of different combinations.
+
 ## Saving and loading learnt models
 
 ### Saving models
