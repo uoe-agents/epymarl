@@ -179,6 +179,7 @@ class PPOLearner:
             target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
     def cuda(self):
+        self.old_mac.cuda()
         self.mac.cuda()
         self.critic.cuda()
         self.target_critic.cuda()
