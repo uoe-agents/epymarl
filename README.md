@@ -22,7 +22,7 @@ To register a custom environment with Gym, use the template below (taken from Le
 ```python
 from gym.envs.registration import registry, register, make, spec
 register(
-  id="Foraging-8x8-2p-3f-v0",                     # Environment ID.
+  id="Foraging-8x8-2p-3f-v1",                     # Environment ID.
   entry_point="lbforaging.foraging:ForagingEnv",  # The entry point for the environment class
   kwargs={
             ...                                   # Arguments that go to ForagingEnv's __init__ function.
