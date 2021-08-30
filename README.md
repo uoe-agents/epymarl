@@ -5,6 +5,7 @@ EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and inc
 - Support for [Gym](https://github.com/openai/gym) environments (on top of the existing SMAC support)
 - Option for no-parameter sharing between agents (original PyMARL only allowed for parameter sharing)
 - Flexibility with extra implementation details (e.g. hard/soft updates, reward standarization, and more)
+- Consistency of implementations between different algorithms (fair comparisons)
 
 ## Installation & Run instructions
 
@@ -70,20 +71,21 @@ Learnt models can be loaded using the `checkpoint_path` parameter, after which t
 
 ## Citing PyMARL and EPyMARL
 
-The Extended PyMARL (EPyMARL) codebase was discussed in [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869).
+The Extended PyMARL (EPyMARL) codebase was used in [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869).
 
 *Georgios Papoudakis, Filippos Christianos, Lukas Schäfer, & Stefano V. Albrecht. Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks, CoRR abs/2006.07869, 2021*
 
 In BibTeX format:
 
 ```tex
-@misc{papoudakis2021benchmarking,
-  title={Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks}, 
-  author={Georgios Papoudakis and Filippos Christianos and Lukas Sch\"afer and Stefano V. Albrecht},
-  year={2021},
-  eprint={2006.07869},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG}
+@inproceedings{papoudakis2021benchmarking,
+   title={Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks},
+   author={Georgios Papoudakis and Filippos Christianos and Lukas Schäfer and Stefano V. Albrecht},
+   booktitle = {Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks (NeurIPS)},
+   year={2021},
+   url = {http://arxiv.org/abs/2006.07869},
+   openreview = {https://openreview.net/forum?id=cIrPX-Sn5n},
+   code = {https://github.com/uoe-agents/epymarl},
 }
 ```
 
