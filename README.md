@@ -12,6 +12,54 @@ EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and inc
 For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers.
 To install the codebase, clone this repo and install the `requirements.txt`.  
 
+### Installing LBF, RWARE, and MPE
+
+In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce and benchmark algorithms in Level-Based Foraging, Multi-Robot Warehouse and Multi-agent Particle environments.
+To install these please visit:
+- [Level Based Foraging](https://github.com/semitable/lb-foraging) or install with `pip install lbforaging`
+- [Multi-Robot Warehouse](https://github.com/semitable/robotic-warehouse) or install with `pip install rware`
+- [Our fork of MPE](https://github.com/semitable/multiagent-particle-envs), clone it and install it with `pip install -e .`
+
+Example of using LBF:
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+```
+Example of using RWARE:
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=500 env_args.key="rware:rware-tiny-2ag-v1"
+```
+
+For MPE, our fork is needed. Essentially all it does (other than fixing some gym compatibility issues) is i) registering the environments with the gym interface when imported as a package and ii) correctly seeding the environments iii) makes the action space compatible with Gym (I think MPE originally does a weird one-hot encoding of the actions).
+
+The environments names in MPE are:
+```
+...
+    "multi_speaker_listener": "MultiSpeakerListener-v0",
+    "simple_adversary": "SimpleAdversary-v0",
+    "simple_crypto": "SimpleCrypto-v0",
+    "simple_push": "SimplePush-v0",
+    "simple_reference": "SimpleReference-v0",
+    "simple_speaker_listener": "SimpleSpeakerListener-v0",
+    "simple_spread": "SimpleSpread-v0",
+    "simple_tag": "SimpleTag-v0",
+    "simple_world_comm": "SimpleWorldComm-v0",
+...
+```
+Therefore, after installing them you can run it using:
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleSpeakerListener-v0"
+```
+
+The pretrained agents are included in this repo [here](https://github.com/uoe-agents/epymarl/tree/main/src/pretrained). You can use them with:
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleAdversary-v0" env_args.pretrained_wrapper="PretrainedAdversary"
+```
+and
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleTag-v0" env_args.pretrained_wrapper="PretrainedTag"
+```
+
+
 ### Using A Gym Environment
 
 EPyMARL supports environments that have been registered with Gym. 
