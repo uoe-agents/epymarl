@@ -7,12 +7,26 @@ EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and inc
 - Flexibility with extra implementation details (e.g. hard/soft updates, reward standarization, and more)
 - Consistency of implementations between different algorithms (fair comparisons)
 
-## Installation & Run instructions
+# Table of Contents
+- [Extended Python MARL framework - EPyMARL](#extended-python-marl-framework---epymarl)
+- [Table of Contents](#table-of-contents)
+- [Installation & Run instructions](#installation--run-instructions)
+  - [Installing LBF, RWARE, and MPE](#installing-lbf-rware-and-mpe)
+  - [Using A Custom Gym Environment](#using-a-custom-gym-environment)
+- [Run an experiment on a Gym environment](#run-an-experiment-on-a-gym-environment)
+- [Run a hyperparameter search](#run-a-hyperparameter-search)
+- [Saving and loading learnt models](#saving-and-loading-learnt-models)
+  - [Saving models](#saving-models)
+  - [Loading models](#loading-models)
+- [Citing PyMARL and EPyMARL](#citing-pymarl-and-epymarl)
+- [License](#license)
+
+# Installation & Run instructions
 
 For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers.
 To install the codebase, clone this repo and install the `requirements.txt`.  
 
-### Installing LBF, RWARE, and MPE
+## Installing LBF, RWARE, and MPE
 
 In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce and benchmark algorithms in Level-Based Foraging, Multi-Robot Warehouse and Multi-agent Particle environments.
 To install these please visit:
@@ -60,7 +74,7 @@ python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25
 ```
 
 
-### Using A Gym Environment
+## Using A Custom Gym Environment
 
 EPyMARL supports environments that have been registered with Gym. 
 The only difference with the Gym framework would be that the returned rewards should be a tuple (one reward for each agent). In this cooperative framework we sum these rewards together.
@@ -79,7 +93,7 @@ register(
     )
 ```
 
-## Run an experiment on a Gym environment
+# Run an experiment on a Gym environment
 
 ```shell
 python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
@@ -95,7 +109,7 @@ They are all located in `src/config`.
 
 All results will be stored in the `Results` folder.
 
-## Run a hyperparameter search
+# Run a hyperparameter search
 
 We include a script named `search.py` which reads a search configuration file (e.g. the included `search.config.example.yaml`) and runs a hyperparameter search in one or more tasks. The script can be run using
 ```shell
@@ -107,17 +121,17 @@ python search.py run --config=search.config.example.yaml --seeds 5 single 1
 ```
 where the 1 is an index to the particular hyperparameter configuration and can take values from 1 to the number of different combinations.
 
-## Saving and loading learnt models
+# Saving and loading learnt models
 
-### Saving models
+## Saving models
 
 You can save the learnt models to disk by setting `save_model = True`, which is set to `False` by default. The frequency of saving models can be adjusted using `save_model_interval` configuration. Models will be saved in the result directory, under the folder called *models*. The directory corresponding each run will contain models saved throughout the experiment, each within a folder corresponding to the number of timesteps passed since starting the learning process.
 
-### Loading models
+## Loading models
 
 Learnt models can be loaded using the `checkpoint_path` parameter, after which the learning will proceed from the corresponding timestep. 
 
-## Citing PyMARL and EPyMARL
+# Citing PyMARL and EPyMARL
 
 The Extended PyMARL (EPyMARL) codebase was used in [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869).
 
@@ -153,6 +167,6 @@ In BibTeX format:
 }
 ```
 
-## License
+# License
 All the source code that has been taken from the PyMARL repository was licensed (and remains so) under the Apache License v2.0 (included in `LICENSE` file).
 Any new code is also licensed under the Apache License v2.0
