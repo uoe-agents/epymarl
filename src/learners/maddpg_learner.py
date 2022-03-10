@@ -5,6 +5,8 @@ import torch as th
 from torch.optim import RMSprop, Adam
 from controllers.maddpg_controller import gumbel_softmax
 from modules.critics import REGISTRY as critic_registry
+from components.standarize_stream import RunningMeanStd
+
 
 class MADDPGLearner:
     def __init__(self, mac, scheme, logger, args):
@@ -28,6 +30,9 @@ class MADDPGLearner:
 
         self.last_target_update_episode = 0
 
+        device = "cuda" if args.use_cuda else "cpu"
+        self.ret_ms = RunningMeanStd(shape=(self.n_agents, ), device=device)
+
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]
@@ -38,8 +43,6 @@ class MADDPGLearner:
         mask = 1 - terminated
         batch_size = batch.batch_size
 
-        if self.args.standardise_rewards:
-            rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
         # Train the critic
         inputs = self._build_inputs(batch)
         actions = actions.view(batch_size, -1, 1, self.n_agents * self.n_actions).expand(-1, -1, self.n_agents, -1)
@@ -58,7 +61,11 @@ class MADDPGLearner:
         target_vals = self.target_critic(inputs[:, 1:], target_actions.detach())
         target_vals = target_vals.view(batch_size, -1, 1)
 
-        targets = rewards.reshape(-1, 1) + self.args.gamma * (1 - terminated.reshape(-1, 1)) * target_vals.reshape(-1, 1)
+        targets = rewards.reshape(-1, 1) + self.args.gamma * (1 - terminated.reshape(-1, 1)) * target_vals.reshape(-1, 1).detach()
+
+        if self.args.standardise_returns:
+            self.ret_ms.update(targets)
+            targets = (targets - self.ret_ms.mean) / th.sqrt(self.ret_ms.var)
 
         td_error = (q_taken.view(-1, 1) - targets.detach())
         masked_td_error = td_error * mask.reshape(-1, 1)

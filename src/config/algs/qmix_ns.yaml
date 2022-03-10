@@ -23,7 +23,7 @@ obs_individual_obs: False
 
 mac: "non_shared_mac"
 agent: "rnn_ns"
-standardise_rewards: True
+standardise_returns: True
 agent_output_type: "q"
 learner: "q_learner"
 double_q: True

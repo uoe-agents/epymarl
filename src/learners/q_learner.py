@@ -4,6 +4,7 @@ from modules.mixers.vdn import VDNMixer
 from modules.mixers.qmix import QMixer
 import torch as th
 from torch.optim import Adam
+from components.standarize_stream import RunningMeanStd
 
 
 class QLearner:
@@ -35,6 +36,9 @@ class QLearner:
         self.last_target_update_step = 0
         self.log_stats_t = -self.args.learner_log_interval - 1
 
+        device = "cuda" if args.use_cuda else "cpu"
+        self.ret_ms = RunningMeanStd(shape=(args.n_agents, ), device=device)
+
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]
@@ -44,8 +48,7 @@ class QLearner:
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
         avail_actions = batch["avail_actions"]
 
-        if self.args.standardise_rewards:
-            rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
+
         # Calculate estimated Q-Values
         mac_out = []
         self.mac.init_hidden(batch.batch_size)
@@ -85,7 +88,11 @@ class QLearner:
             target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:])
 
         # Calculate 1-step Q-Learning targets
-        targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
+        targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals.detach()
+
+        if self.args.standardise_returns:
+            self.ret_ms.update(targets)
+            targets = (targets - self.ret_ms.mean) / th.sqrt(self.ret_ms.var)
 
         # Td-error
         td_error = (chosen_action_qvals - targets.detach())

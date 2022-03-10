@@ -17,7 +17,7 @@ reg: 0.001
 batch_size: 16
 lr: 0.0005
 use_rnn: False
-standardise_rewards: True
+standardise_returns: True
 learner: "maddpg_learner"
 agent_output_type: "pi_logits"
 hidden_dim: 128
