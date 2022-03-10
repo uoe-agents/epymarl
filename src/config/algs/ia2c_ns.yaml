@@ -26,7 +26,7 @@ agent: "rnn_ns"
 agent_output_type: "pi_logits"
 learner: "actor_critic_learner"
 entropy_coef: 0.001
-standardise_rewards: True
+standardise_returns: True
 use_rnn: False
 q_nstep: 5 # 1 corresponds to normal r + gammaV
 critic_type: "ac_critic_ns"

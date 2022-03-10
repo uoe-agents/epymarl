@@ -5,7 +5,7 @@ from utils.rl_utils import build_td_lambda_targets
 import torch as th
 from torch.optim import Adam
 from modules.critics import REGISTRY as critic_registry
-
+from components.standarize_stream import RunningMeanStd
 
 class COMALearner:
     def __init__(self, mac, scheme, logger, args):
@@ -29,6 +29,9 @@ class COMALearner:
         self.agent_optimiser = Adam(params=self.agent_params, lr=args.lr)
         self.critic_optimiser = Adam(params=self.critic_params, lr=args.lr)
 
+        device = "cuda" if args.use_cuda else "cpu"
+        self.ret_ms = RunningMeanStd(shape=(self.n_agents, ), device=device)
+
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
         bs = batch.batch_size
@@ -39,9 +42,6 @@ class COMALearner:
         mask = batch["filled"][:, :-1].float()
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
         avail_actions = batch["avail_actions"][:, :-1]
-
-        if self.args.standardise_rewards:
-            rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
 
         critic_mask = mask.clone()
 
@@ -102,12 +102,20 @@ class COMALearner:
 
     def _train_critic(self, batch, rewards, terminated, actions, avail_actions, mask, bs, max_t):
         # Optimise critic
-        target_q_vals = self.target_critic(batch)[:, :-1]
+        with th.no_grad():
+            target_q_vals = self.target_critic(batch)[:, :-1]
 
         actions = actions[:, :-1]
         targets_taken = th.gather(target_q_vals, dim=3, index=actions).squeeze(3)
 
+        if self.args.standardise_returns:
+            targets_taken = targets_taken * th.sqrt(self.ret_ms.var) + self.ret_ms.mean
+
         targets = self.nstep_returns(rewards, mask, targets_taken, self.args.q_nstep)
+
+        if self.args.standardise_returns:
+            self.ret_ms.update(targets)
+            targets = (targets - self.ret_ms.mean) / th.sqrt(self.ret_ms.var)
 
         running_log = {
             "critic_loss": [],

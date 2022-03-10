@@ -27,7 +27,7 @@ obs_individual_obs: False
 agent_output_type: "pi_logits"
 learner: "coma_learner"
 critic_q_fn: "coma"
-standardise_rewards: True
+standardise_returns: True
 use_rnn: False
 critic_baseline_fn: "coma"
 critic_train_mode: "seq"

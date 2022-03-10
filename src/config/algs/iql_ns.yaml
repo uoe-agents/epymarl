@@ -24,7 +24,7 @@ mac: "non_shared_mac"
 agent: "rnn_ns"
 agent_output_type: "q"
 learner: "q_learner"
-standardise_rewards: True
+standardise_returns: True
 double_q: True
 use_rnn: False
 mixer: # Mixer becomes None
