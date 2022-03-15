@@ -31,7 +31,10 @@ class ActorCriticLearner:
         self.log_stats_t = -self.args.learner_log_interval - 1
 
         device = "cuda" if args.use_cuda else "cpu"
-        self.ret_ms = RunningMeanStd(shape=(self.n_agents, ), device=device)
+        if self.args.standardise_returns:
+            self.ret_ms = RunningMeanStd(shape=(self.n_agents,), device=device)
+        if self.args.standardise_rewards:
+            self.rew_ms = RunningMeanStd(shape=(1,), device=device)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
@@ -42,6 +45,9 @@ class ActorCriticLearner:
         mask = batch["filled"][:, :-1].float()
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
 
+        if self.args.standardise_rewards:
+            self.rew_ms.update(rewards)
+            rewards = (rewards - self.rew_ms.mean) / th.sqrt(self.rew_ms.var)
 
         # No experiences to train on in this minibatch
         if mask.sum() == 0:
@@ -152,7 +158,7 @@ class ActorCriticLearner:
                     break
                 elif step == nsteps:
                     nstep_return_t += self.args.gamma ** (step) * values[:, t] * mask[:, t]
-                elif t == rewards.size(1) - 1:
+                elif t == rewards.size(1) - 1 and self.args.add_value_last_step:
                     nstep_return_t += self.args.gamma ** (step) * values[:, t] * mask[:, t]
                 else:
                     nstep_return_t += self.args.gamma ** (step) * rewards[:, t] * mask[:, t]
