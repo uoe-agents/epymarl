@@ -37,7 +37,10 @@ class QLearner:
         self.log_stats_t = -self.args.learner_log_interval - 1
 
         device = "cuda" if args.use_cuda else "cpu"
-        self.ret_ms = RunningMeanStd(shape=(args.n_agents, ), device=device)
+        if self.args.standardise_returns:
+            self.ret_ms = RunningMeanStd(shape=(self.n_agents,), device=device)
+        if self.args.standardise_rewards:
+            self.rew_ms = RunningMeanStd(shape=(1,), device=device)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
@@ -48,6 +51,9 @@ class QLearner:
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
         avail_actions = batch["avail_actions"]
 
+        if self.args.standardise_rewards:
+            self.rew_ms.update(rewards)
+            rewards = (rewards - self.rew_ms.mean) / th.sqrt(self.rew_ms.var)
 
         # Calculate estimated Q-Values
         mac_out = []
@@ -86,6 +92,9 @@ class QLearner:
         if self.mixer is not None:
             chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1])
             target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:])
+
+        if self.args.standardise_returns:
+            target_max_qvals = target_max_qvals * th.sqrt(self.ret_ms.var) + self.ret_ms.mean
 
         # Calculate 1-step Q-Learning targets
         targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals.detach()
