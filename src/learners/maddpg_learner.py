@@ -31,7 +31,10 @@ class MADDPGLearner:
         self.last_target_update_episode = 0
 
         device = "cuda" if args.use_cuda else "cpu"
-        self.ret_ms = RunningMeanStd(shape=(self.n_agents, ), device=device)
+        if self.args.standardise_returns:
+            self.ret_ms = RunningMeanStd(shape=(self.n_agents,), device=device)
+        if self.args.standardise_rewards:
+            self.rew_ms = RunningMeanStd(shape=(1,), device=device)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
@@ -42,6 +45,10 @@ class MADDPGLearner:
         terminated = terminated.unsqueeze(2).expand(-1, -1, self.n_agents, -1)
         mask = 1 - terminated
         batch_size = batch.batch_size
+
+        if self.args.standardise_rewards:
+            self.rew_ms.update(rewards)
+            rewards = (rewards - self.rew_ms.mean) / th.sqrt(self.rew_ms.var)
 
         # Train the critic
         inputs = self._build_inputs(batch)
@@ -60,6 +67,9 @@ class MADDPGLearner:
         target_actions = target_actions.view(batch_size, -1, 1, self.n_agents * self.n_actions).expand(-1, -1, self.n_agents, -1)
         target_vals = self.target_critic(inputs[:, 1:], target_actions.detach())
         target_vals = target_vals.view(batch_size, -1, 1)
+
+        if self.args.standardise_returns:
+            target_vals = target_vals * th.sqrt(self.ret_ms.var) + self.ret_ms.mean
 
         targets = rewards.reshape(-1, 1) + self.args.gamma * (1 - terminated.reshape(-1, 1)) * target_vals.reshape(-1, 1).detach()
 
