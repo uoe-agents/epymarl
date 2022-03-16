@@ -26,7 +26,8 @@ agent: "rnn_ns"
 agent_output_type: "pi_logits"
 learner: "ppo_learner"
 entropy_coef: 0.01
-standardise_returns: True
+standardise_returns: False
+standardise_rewards: True
 use_rnn: False
 epochs: 4
 eps_clip: 0.2

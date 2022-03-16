@@ -17,7 +17,8 @@ mac: "maddpg_mac"
 reg: 0.001
 batch_size: 16
 lr: 0.0005
-standardise_returns: True
+standardise_returns: False
+standardise_rewards: True
 use_rnn: False
 learner: "maddpg_learner"
 agent_output_type: "pi_logits"

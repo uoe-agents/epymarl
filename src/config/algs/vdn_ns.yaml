@@ -22,7 +22,8 @@ obs_individual_obs: False
 # use the Q_Learner to train
 mac: "non_shared_mac"
 agent: "rnn_ns"
-standardise_returns: True
+standardise_returns: False
+standardise_rewards: True
 use_rnn: False
 agent_output_type: "q"
 learner: "q_learner"
