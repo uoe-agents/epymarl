@@ -108,7 +108,7 @@ class ActorCriticLearner:
     def train_critic_sequential(self, critic, target_critic, batch, rewards, mask):
         # Optimise critic
         with th.no_grad():
-            target_vals = target_critic(batch)[:, :-1]
+            target_vals = target_critic(batch)
             target_vals = target_vals.squeeze(3)
 
         if self.args.standardise_returns:
@@ -144,12 +144,10 @@ class ActorCriticLearner:
         running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
         running_log["q_taken_mean"].append((v * mask).sum().item() / mask_elems)
         running_log["target_mean"].append((target_returns * mask).sum().item() / mask_elems)
-
-
         return masked_td_error, running_log
 
     def nstep_returns(self, rewards, mask, values, nsteps):
-        nstep_values = th.zeros_like(values)
+        nstep_values = th.zeros_like(values[:, :-1])
         for t_start in range(rewards.size(1)):
             nstep_return_t = th.zeros_like(values[:, 0])
             for step in range(nsteps + 1):
@@ -157,11 +155,12 @@ class ActorCriticLearner:
                 if t >= rewards.size(1):
                     break
                 elif step == nsteps:
-                    nstep_return_t += self.args.gamma ** (step) * values[:, t] * mask[:, t]
+                    nstep_return_t += self.args.gamma ** step * values[:, t] * mask[:, t]
                 elif t == rewards.size(1) - 1 and self.args.add_value_last_step:
-                    nstep_return_t += self.args.gamma ** (step) * values[:, t] * mask[:, t]
+                    nstep_return_t += self.args.gamma ** step * rewards[:, t] * mask[:, t]
+                    nstep_return_t += self.args.gamma ** (step + 1) * values[:, t+1]
                 else:
-                    nstep_return_t += self.args.gamma ** (step) * rewards[:, t] * mask[:, t]
+                    nstep_return_t += self.args.gamma ** step * rewards[:, t] * mask[:, t]
             nstep_values[:, t_start, :] = nstep_return_t
         return nstep_values
 
