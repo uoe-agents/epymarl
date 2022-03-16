@@ -30,7 +30,10 @@ class COMALearner:
         self.critic_optimiser = Adam(params=self.critic_params, lr=args.lr)
 
         device = "cuda" if args.use_cuda else "cpu"
-        self.ret_ms = RunningMeanStd(shape=(self.n_agents, ), device=device)
+        if self.args.standardise_returns:
+            self.ret_ms = RunningMeanStd(shape=(self.n_agents,), device=device)
+        if self.args.standardise_rewards:
+            self.rew_ms = RunningMeanStd(shape=(1,), device=device)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
@@ -42,6 +45,10 @@ class COMALearner:
         mask = batch["filled"][:, :-1].float()
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
         avail_actions = batch["avail_actions"][:, :-1]
+
+        if self.args.standardise_rewards:
+            self.rew_ms.update(rewards)
+            rewards = (rewards - self.rew_ms.mean) / th.sqrt(self.rew_ms.var)
 
         critic_mask = mask.clone()
 
@@ -103,9 +110,8 @@ class COMALearner:
     def _train_critic(self, batch, rewards, terminated, actions, avail_actions, mask, bs, max_t):
         # Optimise critic
         with th.no_grad():
-            target_q_vals = self.target_critic(batch)[:, :-1]
+            target_q_vals = self.target_critic(batch)
 
-        actions = actions[:, :-1]
         targets_taken = th.gather(target_q_vals, dim=3, index=actions).squeeze(3)
 
         if self.args.standardise_returns:
@@ -125,6 +131,7 @@ class COMALearner:
             "q_taken_mean": [],
         }
 
+        actions = actions[:, :-1]
         q_vals = self.critic(batch)[:, :-1]
         q_taken = th.gather(q_vals, dim=3, index=actions).squeeze(3)
 
@@ -145,41 +152,9 @@ class COMALearner:
         running_log["target_mean"].append((targets * mask).sum().item() / mask_elems)
 
         return q_vals, running_log
-        # for t in reversed(range(rewards.size(1))):
-        #     mask_t = mask[:, t].expand(-1, self.n_agents)
-        #     if mask_t.sum() == 0:
-        #         continue
-        #
-        #     q_t = self.critic(batch, t)
-        #     q_vals[:, t] = q_t.view(bs, self.n_agents, self.n_actions)
-        #     q_taken = th.gather(q_t, dim=3, index=actions[:, t:t+1]).squeeze(3).squeeze(1)
-        #     targets_t = targets[:, t]
-        #
-        #     td_error = (q_taken - targets_t.detach())
-        #
-        #     # 0-out the targets that came from padded data
-        #     masked_td_error = td_error * mask_t
-        #
-        #     # Normal L2 loss, take mean over actual data
-        #     loss = (masked_td_error ** 2).sum() / mask_t.sum()
-        #     self.critic_optimiser.zero_grad()
-        #     loss.backward()
-        #     grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
-        #     self.critic_optimiser.step()
-        #     self.critic_training_steps += 1
-        #
-        #     running_log["critic_loss"].append(loss.item())
-        #     running_log["critic_grad_norm"].append(grad_norm)
-        #     mask_elems = mask_t.sum().item()
-        #     running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
-        #     running_log["q_taken_mean"].append((q_taken * mask_t).sum().item() / mask_elems)
-        #     running_log["target_mean"].append((targets_t * mask_t).sum().item() / mask_elems)
-
-
-
 
     def nstep_returns(self, rewards, mask, values, nsteps):
-        nstep_values = th.zeros_like(values)
+        nstep_values = th.zeros_like(values[:, :-1])
         for t_start in range(rewards.size(1)):
             nstep_return_t = th.zeros_like(values[:, 0])
             for step in range(nsteps + 1):
@@ -187,9 +162,10 @@ class COMALearner:
                 if t >= rewards.size(1):
                     break
                 elif step == nsteps:
-                    nstep_return_t += self.args.gamma ** (step) * values[:, t] * mask[:, t]
-                elif t == rewards.size(1) - 1:
-                    nstep_return_t += self.args.gamma ** (step) * values[:, t] * mask[:, t]
+                    nstep_return_t += self.args.gamma ** step * values[:, t] * mask[:, t]
+                elif t == rewards.size(1) - 1 and self.args.add_value_last_step:
+                    nstep_return_t += self.args.gamma ** step * rewards[:, t] * mask[:, t]
+                    nstep_return_t += self.args.gamma ** (step + 1) * values[:, t + 1]
                 else:
                     nstep_return_t += self.args.gamma ** (step) * rewards[:, t] * mask[:, t]
             nstep_values[:, t_start, :] = nstep_return_t
