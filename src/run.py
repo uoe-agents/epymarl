@@ -37,7 +37,7 @@ def run(_run, _config, _log):
     try:
         map_name = _config["env_args"]["map_name"]
     except:
-        map_name = _config["env_args"]["key"]   
+        map_name = _config["env_args"]["key"]
     unique_token = f"{_config['name']}_seed{_config['seed']}_{map_name}_{datetime.datetime.now()}"
 
     args.unique_token = unique_token
@@ -233,7 +233,6 @@ def run_sequential(args, logger):
             learner.save_models(save_path)
 
         episode += args.batch_size_run
-
         if (runner.t_env - last_log_T) >= args.log_interval:
             logger.log_stat("episode", episode, runner.t_env)
             logger.print_recent_stats()

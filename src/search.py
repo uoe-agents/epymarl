@@ -28,7 +28,7 @@ def _filter_configs(configs, mask):
 
 
 def _compute_combinations(config_file, shuffle, seeds):
-    config = yaml.load(config_file)
+    config = yaml.load(config_file, Loader=yaml.FullLoader)
     combinations = []
     for k, v in config["grid-search"].items():
         if type(v) is not list:

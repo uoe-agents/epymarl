@@ -2,7 +2,7 @@ env: "gymma"
 
 env_args:
   key: null
-  time_limit: 100
+  time_limit: 200
   pretrained_wrapper: null
 
 test_greedy: True
@@ -13,4 +13,7 @@ runner_log_interval: 100
 learner_log_interval: 100
 t_max: 100000
 save_model: True
-save_model_interval: 10000
+save_model_interval: 1000
+evaluate: True
+checkpoint_path: /home/adam/code/diss/epymarl/results/models/qmix_seed441222698_smaclite:smaclite/2s3z-v0_2022-07-02 10:51:16.516540
+render: True
