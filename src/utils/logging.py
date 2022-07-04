@@ -37,7 +37,7 @@ class Logger:
             else:
                 self.sacred_info["{}_T".format(key)] = [t]
                 self.sacred_info[key] = [value]
-            
+
             self._run_obj.log_scalar(key, value, t)
 
     def print_recent_stats(self):
