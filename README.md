@@ -30,8 +30,8 @@ To install the codebase, clone this repo and install the `requirements.txt`.
 
 In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce and benchmark algorithms in Level-Based Foraging, Multi-Robot Warehouse and Multi-agent Particle environments.
 To install these please visit:
-- [Level Based Foraging](https://github.com/semitable/lb-foraging) or install with `pip install lbforaging`
-- [Multi-Robot Warehouse](https://github.com/semitable/robotic-warehouse) or install with `pip install rware`
+- [Level Based Foraging](https://github.com/uoe-agents/lb-foraging) or install with `pip install lbforaging`
+- [Multi-Robot Warehouse](https://github.com/uoe-agents/robotic-warehouse) or install with `pip install rware`
 - [Our fork of MPE](https://github.com/semitable/multiagent-particle-envs), clone it and install it with `pip install -e .`
 
 Example of using LBF:
