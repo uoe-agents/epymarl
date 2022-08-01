@@ -12,10 +12,6 @@ batch_size: 10
 env_args:
   state_last_action: False # critic adds last action internally
 
-# update the target network every {} training steps
-target_update_interval_or_tau: 200
-
-lr: 0.0005
 
 obs_agent_id: True
 obs_last_action: False
@@ -34,3 +30,4 @@ eps_clip: 0.2
 name: "mappo"
 
 t_max: 20050000
+
