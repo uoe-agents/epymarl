@@ -12,10 +12,6 @@ batch_size: 10
 env_args:
   state_last_action: False # critic adds last action internally
 
-# update the target network every {} training steps
-target_update_interval_or_tau: 200
-
-lr: 0.0005
 
 obs_agent_id: True
 obs_last_action: False
@@ -23,13 +19,16 @@ obs_individual_obs: False
 
 agent_output_type: "pi_logits"
 learner: "actor_critic_learner"
-entropy_coef: 0.01
-use_rnn: False
 standardise_returns: False
-standardise_rewards: True
-q_nstep: 5 # 1 corresponds to normal r + gammaV
 critic_type: "cv_critic"
 
 name: "maa2c"
 
-t_max: 20050000
+# Hyperparams from paper
+hiden_dim: 128
+lr: 0.0005
+standardise_rewards: True
+use_rnn: False
+entropy_coef: 0.01
+target_update_interval_or_tau: 0.01
+q_nstep: 5
