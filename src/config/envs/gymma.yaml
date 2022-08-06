@@ -4,6 +4,7 @@ env_args:
   key: null
   time_limit: 100
   pretrained_wrapper: null
+  use_cpp_rvo2: false
 
 test_greedy: True
 test_nepisode: 100
