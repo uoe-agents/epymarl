@@ -26,6 +26,7 @@ learner: "ppo_learner"
 entropy_coef: 0.01
 use_rnn: False
 standardise_returns: True
+standardise_rewards: False
 q_nstep: 5 # 1 corresponds to normal r + gammaV
 critic_type: "cv_critic"
 epochs: 4
