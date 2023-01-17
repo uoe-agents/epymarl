@@ -7,6 +7,8 @@ EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and inc
 - Flexibility with extra implementation details (e.g. hard/soft updates, reward standarization, and more)
 - Consistency of implementations between different algorithms (fair comparisons)
 
+See our blog post here: https://agents.inf.ed.ac.uk/blog/epymarl/
+
 # Table of Contents
 - [Extended Python MARL framework - EPyMARL](#extended-python-marl-framework---epymarl)
 - [Table of Contents](#table-of-contents)
