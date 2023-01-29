@@ -1,5 +1,4 @@
 from functools import partial
-
 import pretrained
 from smac.env import MultiAgentEnv, StarCraft2Env
 import sys
@@ -41,7 +40,9 @@ class TimeLimit(GymTimeLimit):
         observation, reward, done, info = self.env.step(action)
         self._elapsed_steps += 1
         if self._elapsed_steps >= self._max_episode_steps:
-            info["TimeLimit.truncated"] = not done
+            info["TimeLimit.truncated"] = not all(done) \
+                if type(done) is list \
+                else not done
             done = len(observation) * [True]
         return observation, reward, done, info
 
@@ -112,6 +113,10 @@ class _GymmaWrapper(MultiAgentEnv):
             for o in self._obs
         ]
 
+        if type(reward) is list:
+            reward = sum(reward)
+        if type(done) is list:
+            done = all(done)
         return float(reward), done, {}
 
     def get_obs(self):
@@ -134,17 +139,8 @@ class _GymmaWrapper(MultiAgentEnv):
     def get_state_size(self):
         """ Returns the shape of the state"""
         if hasattr(self.original_env, 'state_size'):
-            print("Returning state size from underlying env")
             return self.original_env.state_size
         return self.n_agents * flatdim(self.longest_observation_space)
-
-    def get_obs_agent(self, agent_id):
-        """ Returns observation for agent_id """
-        raise self._obs[agent_id]
-
-    def get_obs_size(self):
-        """ Returns the shape of the observation """
-        return flatdim(self.longest_observation_space)
 
     def get_avail_actions(self):
         if 'avail_actions' in self._info:

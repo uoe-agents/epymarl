@@ -233,6 +233,7 @@ def run_sequential(args, logger):
             learner.save_models(save_path)
 
         episode += args.batch_size_run
+
         if (runner.t_env - last_log_T) >= args.log_interval:
             logger.log_stat("episode", episode, runner.t_env)
             logger.print_recent_stats()
