@@ -11,6 +11,8 @@ runner: "episode"
 
 buffer_size: 5000
 
+# update the target network every {} episodes
+target_update_interval_or_tau: 200
 
 
 obs_agent_id: True
@@ -26,17 +28,9 @@ agent_output_type: "q"
 learner: "q_learner"
 double_q: True
 mixer: "qmix"
+use_rnn: False
 mixing_embed_dim: 32
 hypernet_layers: 2
 hypernet_embed: 64
 
 name: "qmix"
-
-# Hyperparams from paper
-hiden_dim: 128
-lr: 0.005
-standardise_rewards: True
-use_rnn: True
-evaluation_epsilon: 0.05
-epsilon_anneal_time: 50000
-target_update_interval_or_tau: 200
