@@ -4,10 +4,14 @@
 action_selector: "epsilon_greedy"
 epsilon_start: 1.0
 epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+evaluation_epsilon: 0.0
 runner: "episode"
 
 buffer_size: 5000
 
+# update the target network every {} episodes
+target_update_interval_or_tau: 200
 
 
 obs_agent_id: True
@@ -19,16 +23,9 @@ obs_individual_obs: False
 agent_output_type: "q"
 learner: "q_learner"
 standardise_returns: False
+standardise_rewards: True
 double_q: True
+use_rnn: False
 mixer: # Mixer becomes None
 
 name: "iql"
-
-# Hyperparams from paper
-hiden_dim: 128
-lr: 0.0005
-standardise_rewards: False
-use_rnn: True
-evaluation_epsilon: 0.05
-epsilon_anneal_time: 50000
-target_update_interval_or_tau: 200

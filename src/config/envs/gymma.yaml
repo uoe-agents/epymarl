@@ -12,6 +12,4 @@ test_interval: 50000
 log_interval: 50000
 runner_log_interval: 10000
 learner_log_interval: 10000
-t_max: 6100000
-save_model: True
-save_model_interval: 200000
+t_max: 2050000
