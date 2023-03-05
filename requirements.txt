@@ -12,7 +12,7 @@ Pillow
 pluggy==0.7.1
 portpicker==1.2.0
 probscale
-protobuf==3.6.1
+protobuf==3.20.2
 py==1.6.0
 pygame
 pyparsing==2.2.2
@@ -29,8 +29,8 @@ six==1.11.0
 sk-video==1.1.10
 snakeviz
 tensorboard-logger
-torch
-torchvision
+torch==1.9.0
+torchvision==0.10.0
 tornado==5.1.1
 urllib3==1.23
 websocket-client==0.53.0
