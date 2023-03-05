@@ -40,7 +40,9 @@ class TimeLimit(GymTimeLimit):
         observation, reward, done, info = self.env.step(action)
         self._elapsed_steps += 1
         if self._elapsed_steps >= self._max_episode_steps:
-            info["TimeLimit.truncated"] = not all(done)
+            info["TimeLimit.truncated"] = not all(done) \
+                if type(done) is list \
+                else not done
             done = len(observation) * [True]
         return observation, reward, done, info
 
@@ -76,9 +78,10 @@ class FlattenObservation(ObservationWrapper):
 
 
 class _GymmaWrapper(MultiAgentEnv):
-    def __init__(self, key, time_limit, pretrained_wrapper, **kwargs):
+    def __init__(self, key, time_limit, pretrained_wrapper, seed, **kwargs):
+        self.original_env = gym.make(f"{key}", **kwargs)
         self.episode_limit = time_limit
-        self._env = TimeLimit(gym.make(f"{key}"), max_episode_steps=time_limit)
+        self._env = TimeLimit(self.original_env, max_episode_steps=time_limit)
         self._env = FlattenObservation(self._env)
 
         if pretrained_wrapper:
@@ -86,19 +89,20 @@ class _GymmaWrapper(MultiAgentEnv):
 
         self.n_agents = self._env.n_agents
         self._obs = None
+        self._info = None
 
         self.longest_action_space = max(self._env.action_space, key=lambda x: x.n)
         self.longest_observation_space = max(
             self._env.observation_space, key=lambda x: x.shape
         )
 
-        self._seed = kwargs["seed"]
+        self._seed = seed
         self._env.seed(self._seed)
 
     def step(self, actions):
         """ Returns reward, terminated, info """
         actions = [int(a) for a in actions]
-        self._obs, reward, done, info = self._env.step(actions)
+        self._obs, reward, done, self._info = self._env.step(actions)
         self._obs = [
             np.pad(
                 o,
@@ -109,7 +113,11 @@ class _GymmaWrapper(MultiAgentEnv):
             for o in self._obs
         ]
 
-        return float(sum(reward)), all(done), {}
+        if type(reward) is list:
+            reward = sum(reward)
+        if type(done) is list:
+            done = all(done)
+        return float(reward), done, {}
 
     def get_obs(self):
         """ Returns all agent observations in a list """
@@ -128,21 +136,8 @@ class _GymmaWrapper(MultiAgentEnv):
 
     def get_state_size(self):
         """ Returns the shape of the state"""
-        return self.n_agents * flatdim(self.longest_observation_space)
-
-    def get_obs_agent(self, agent_id):
-        """ Returns observation for agent_id """
-        raise self._obs[agent_id]
-
-    def get_obs_size(self):
-        """ Returns the shape of the observation """
-        return flatdim(self.longest_observation_space)
-
-    def get_state(self):
-        return np.concatenate(self._obs, axis=0).astype(np.float32)
-
-    def get_state_size(self):
-        """ Returns the shape of the state"""
+        if hasattr(self.original_env, 'state_size'):
+            return self.original_env.state_size
         return self.n_agents * flatdim(self.longest_observation_space)
 
     def get_avail_actions(self):

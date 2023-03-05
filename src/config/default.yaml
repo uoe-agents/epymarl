@@ -22,6 +22,7 @@ save_model: False # Save the models to disk
 save_model_interval: 50000 # Save models after this many timesteps
 checkpoint_path: "" # Load a checkpoint from this path
 evaluate: False # Evaluate model for test_nepisode episodes and quit (no training)
+render: False # Render the environment when evaluating (only when evaluate == True)
 load_step: 0 # Load model trained on this many timesteps (0 if choose max possible)
 save_replay: False # Saving the replay of the model loaded from checkpoint_path
 local_results_path: "results" # Path for local results

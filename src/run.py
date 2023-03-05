@@ -37,7 +37,7 @@ def run(_run, _config, _log):
     try:
         map_name = _config["env_args"]["map_name"]
     except:
-        map_name = _config["env_args"]["key"]   
+        map_name = _config["env_args"]["key"]
     unique_token = f"{_config['name']}_seed{_config['seed']}_{map_name}_{datetime.datetime.now()}"
 
     args.unique_token = unique_token

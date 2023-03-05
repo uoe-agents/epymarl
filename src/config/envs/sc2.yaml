@@ -23,7 +23,7 @@ env_args:
   reward_win: 200
   replay_dir: ""
   replay_prefix: ""
-  state_last_action: True
+  state_last_action: False
   state_timestep_number: False
   step_mul: 8
   seed: null
