@@ -11,4 +11,4 @@ config=$1
 env_config=${2:-gymma}
 env_name=${3:-"pressureplate:pressureplate-linear-4p-v0"}
 
-python3 src/main.py --config=saf --env-config=gymma with env_args.time_limit=25 env_args.key="pressureplate:pressureplate-linear-4p-v0"
+python3 src/main.py --config=$1 --env-config=$2 with env_args.time_limit=25 env_args.key=$3
