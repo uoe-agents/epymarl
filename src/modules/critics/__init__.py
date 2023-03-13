@@ -6,6 +6,7 @@ from .maddpg import MADDPGCritic
 from .maddpg_ns import MADDPGCriticNS
 from .ac import ACCritic
 from .ac_ns import ACCriticNS
+from .centralV_sk import CentralVCriticSK
 REGISTRY = {}
 
 REGISTRY["coma_critic"] = COMACritic
@@ -16,5 +17,5 @@ REGISTRY["maddpg_critic"] = MADDPGCritic
 REGISTRY["maddpg_critic_ns"] = MADDPGCriticNS
 REGISTRY["ac_critic"] = ACCritic
 REGISTRY["ac_critic_ns"] = ACCriticNS
-
+REGISTRY["cv_critic_sk"] = CentralVCriticSK
 
