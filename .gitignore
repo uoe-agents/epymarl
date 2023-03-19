@@ -249,5 +249,6 @@ $RECYCLE.BIN/
 
 3rdparty
 __MACOSX
-results
+*/sacred/*/*/*
+!*/sacred/*/*/final
 *.out
