@@ -35,7 +35,7 @@ t_max: 20050000
 use_policy_pool: False
 use_SK: True
 n_policy: 4
-N_SK_slots: 4
+N_SK_slots: 2
 hidden_dim: 128
 n_layers: 2
 activation: "tanh"
