@@ -14,8 +14,7 @@
   "env_args": {
     "key": "pressureplate:pressureplate-linear-4p-v0",
     "pretrained_wrapper": null,
-    "state_last_action": false,
-    "time_limit": 500
+    "time_limit": 25
   },
   "epochs": 4,
   "eps_clip": 0.2,
@@ -40,14 +39,15 @@
   "optim_alpha": 0.99,
   "optim_eps": 1e-05,
   "q_nstep": 5,
+  "render": false,
   "repeat_id": 1,
   "runner": "parallel",
   "runner_log_interval": 10000,
   "save_model": false,
   "save_model_interval": 50000,
   "save_replay": false,
-  "seed": 455304330,
-  "standardise_returns": true,
+  "seed": 576713914,
+  "standardise_returns": false,
   "standardise_rewards": false,
   "t_max": 20050000,
   "target_update_interval_or_tau": 200,
