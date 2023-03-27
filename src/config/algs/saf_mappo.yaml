@@ -1,4 +1,3 @@
-# Default SAF on MAPPO 
 # --- MAPPO specific parameters ---
 
 action_selector: "soft_policies"
@@ -20,7 +19,7 @@ obs_last_action: False
 obs_individual_obs: False
 
 agent_output_type: "pi_logits"
-learner: "saf_learner"
+learner: "ppo_learner"
 entropy_coef: 0.01
 use_rnn: False
 standardise_returns: False
