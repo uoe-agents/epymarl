@@ -16,7 +16,7 @@
   "env_args": {
     "key": "lbforaging:Foraging-15x15-4p-5f-v2",
     "pretrained_wrapper": null,
-    "time_limit": 25
+    "time_limit": 100
   },
   "epochs": 4,
   "eps_clip": 0.2,
@@ -52,7 +52,7 @@
   "save_model": false,
   "save_model_interval": 50000,
   "save_replay": false,
-  "seed": 217189083,
+  "seed": 706929800,
   "standardise_returns": false,
   "standardise_rewards": false,
   "t_max": 20050000,

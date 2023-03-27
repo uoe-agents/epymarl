@@ -12,9 +12,9 @@
   "entropy_coef": 0.01,
   "env": "gymma",
   "env_args": {
-    "key": "lbforaging:Foraging-15x15-4p-5f-v2",
+    "key": "rware:rware-tiny-2ag-v1",
     "pretrained_wrapper": null,
-    "time_limit": 100
+    "time_limit": 500
   },
   "epochs": 4,
   "eps_clip": 0.2,
@@ -46,7 +46,7 @@
   "save_model": false,
   "save_model_interval": 50000,
   "save_replay": false,
-  "seed": 334178292,
+  "seed": 77359622,
   "standardise_returns": false,
   "standardise_rewards": false,
   "t_max": 20050000,

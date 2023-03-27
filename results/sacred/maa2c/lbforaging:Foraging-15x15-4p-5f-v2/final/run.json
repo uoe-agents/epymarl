@@ -44,21 +44,21 @@
       ]
     ]
   },
-  "heartbeat": "2023-03-26T19:38:11.904895",
+  "heartbeat": "2023-03-26T16:11:14.669659",
   "host": {
     "ENV": {},
-    "cpu": "AMD EPYC 7352 24-Core Processor",
+    "cpu": "Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz",
     "gpus": {
-      "driver_version": "495.29.05",
+      "driver_version": "515.86.01",
       "gpus": [
         {
-          "model": "NVIDIA A100-PCIE-40GB",
+          "model": "NVIDIA A100 80GB PCIe",
           "persistence_mode": true,
-          "total_memory": 40536
+          "total_memory": 81920
         }
       ]
     },
-    "hostname": "xgpg6",
+    "hostname": "xgph12",
     "os": [
       "Linux",
       "Linux-5.4.0-135-generic-x86_64-with-glibc2.29"
@@ -98,7 +98,7 @@
   },
   "resources": [],
   "result": null,
-  "start_time": "2023-03-26T06:39:17.885227",
+  "start_time": "2023-03-26T06:39:50.596710",
   "status": "COMPLETED",
-  "stop_time": "2023-03-26T19:38:11.819544"
+  "stop_time": "2023-03-26T16:11:14.594483"
 }

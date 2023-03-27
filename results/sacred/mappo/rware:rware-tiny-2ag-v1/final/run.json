@@ -4,10 +4,9 @@
   "experiment": {
     "base_dir": "/home/e/e0014172/fyp/epymarl/src",
     "dependencies": [
-      "munch==2.5.0",
       "numpy==1.22.0",
       "PyYAML==5.3.1",
-      "sacred==0.8.2",
+      "sacred==0.8.4",
       "torch==1.13.0"
     ],
     "mainfile": "main.py",
@@ -44,21 +43,21 @@
       ]
     ]
   },
-  "heartbeat": "2023-03-26T19:38:11.904895",
+  "heartbeat": "2023-03-26T20:40:17.453156",
   "host": {
     "ENV": {},
-    "cpu": "AMD EPYC 7352 24-Core Processor",
+    "cpu": "Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz",
     "gpus": {
-      "driver_version": "495.29.05",
+      "driver_version": "515.86.01",
       "gpus": [
         {
-          "model": "NVIDIA A100-PCIE-40GB",
+          "model": "NVIDIA A100 80GB PCIe",
           "persistence_mode": true,
-          "total_memory": 40536
+          "total_memory": 81920
         }
       ]
     },
-    "hostname": "xgpg6",
+    "hostname": "xgph18",
     "os": [
       "Linux",
       "Linux-5.4.0-135-generic-x86_64-with-glibc2.29"
@@ -67,6 +66,13 @@
   },
   "meta": {
     "command": "my_main",
+    "config_updates": {
+      "env_args": {
+        "key": "rware:rware-tiny-2ag-v1",
+        "time_limit": 500
+      }
+    },
+    "named_configs": [],
     "options": {
       "--beat-interval": null,
       "--capture": null,
@@ -76,6 +82,7 @@
       "--file_storage": null,
       "--force": false,
       "--help": false,
+      "--id": null,
       "--loglevel": null,
       "--mongo_db": null,
       "--name": null,
@@ -89,8 +96,8 @@
       "--unobserved": false,
       "COMMAND": null,
       "UPDATE": [
-        "env_args.time_limit=100",
-        "env_args.key=lbforaging:Foraging-15x15-4p-5f-v2"
+        "env_args.time_limit=500",
+        "env_args.key=rware:rware-tiny-2ag-v1"
       ],
       "help": false,
       "with": true
@@ -98,7 +105,7 @@
   },
   "resources": [],
   "result": null,
-  "start_time": "2023-03-26T06:39:17.885227",
+  "start_time": "2023-03-26T09:38:30.508626",
   "status": "COMPLETED",
-  "stop_time": "2023-03-26T19:38:11.819544"
+  "stop_time": "2023-03-26T20:40:17.332163"
 }

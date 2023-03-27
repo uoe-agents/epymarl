@@ -14,17 +14,17 @@
     "name": "pymarl",
     "repositories": [
       {
-        "commit": "1d62c69d015c617f1bfb2786c969ffbbdfe830ca",
+        "commit": "596ee5aad61a70c201acea774795f1e8819fe8bc",
         "dirty": false,
         "url": "https://github.com/hughjazzman/epymarl.git"
       },
       {
-        "commit": "1d62c69d015c617f1bfb2786c969ffbbdfe830ca",
+        "commit": "596ee5aad61a70c201acea774795f1e8819fe8bc",
         "dirty": false,
         "url": "https://github.com/hughjazzman/epymarl.git"
       },
       {
-        "commit": "1d62c69d015c617f1bfb2786c969ffbbdfe830ca",
+        "commit": "596ee5aad61a70c201acea774795f1e8819fe8bc",
         "dirty": false,
         "url": "https://github.com/hughjazzman/epymarl.git"
       }
@@ -44,21 +44,21 @@
       ]
     ]
   },
-  "heartbeat": "2023-03-25T00:07:58.746433",
+  "heartbeat": "2023-03-26T18:23:05.289092",
   "host": {
     "ENV": {},
-    "cpu": "AMD EPYC 7352 24-Core Processor",
+    "cpu": "Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz",
     "gpus": {
-      "driver_version": "510.108.03",
+      "driver_version": "515.86.01",
       "gpus": [
         {
-          "model": "NVIDIA A100-PCIE-40GB",
-          "persistence_mode": false,
-          "total_memory": 40960
+          "model": "NVIDIA A100 80GB PCIe",
+          "persistence_mode": true,
+          "total_memory": 81920
         }
       ]
     },
-    "hostname": "xgpg8",
+    "hostname": "xgph10",
     "os": [
       "Linux",
       "Linux-5.4.0-135-generic-x86_64-with-glibc2.29"
@@ -89,7 +89,7 @@
       "--unobserved": false,
       "COMMAND": null,
       "UPDATE": [
-        "env_args.time_limit=25",
+        "env_args.time_limit=100",
         "env_args.key=lbforaging:Foraging-15x15-4p-5f-v2"
       ],
       "help": false,
@@ -98,7 +98,7 @@
   },
   "resources": [],
   "result": null,
-  "start_time": "2023-03-24T10:54:18.862636",
+  "start_time": "2023-03-26T06:39:18.003654",
   "status": "COMPLETED",
-  "stop_time": "2023-03-25T00:07:58.656645"
+  "stop_time": "2023-03-26T18:23:05.196793"
 }
