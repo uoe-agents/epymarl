@@ -8,28 +8,6 @@ from torch.optim import Adam
 from modules.critics import REGISTRY as critic_resigtry
 from components.standarize_stream import RunningMeanStd
 
-
-def object_copy(instance, init_args=None):
-    if init_args:
-        new_obj = instance.__class__(**init_args)
-    else:
-        new_obj = instance.__class__()
-    if hasattr(instance, '__dict__'):
-        for k in instance.__dict__ :
-            try:
-                attr_copy = copy.deepcopy(getattr(instance, k))
-            except Exception as e:
-                attr_copy = object_copy(getattr(instance, k))
-            setattr(new_obj, k, attr_copy)
-
-        new_attrs = list(new_obj.__dict__.keys())
-        for k in new_attrs:
-            if not hasattr(instance, k):
-                delattr(new_obj, k)
-        return new_obj
-    else:
-        return instance
-
 class PPOLearner:
     def __init__(self, mac, scheme, logger, args):
         self.args = args
@@ -43,7 +21,6 @@ class PPOLearner:
         self.agent_optimiser = Adam(params=self.agent_params, lr=args.lr)
 
         self.critic = critic_resigtry[args.critic_type](scheme, args)
-        # self.target_critic = copy.deepcopy(self.critic)
         self.target_critic = critic_resigtry[args.critic_type](scheme, args)
 
         self.critic_params = list(self.critic.parameters())

@@ -21,7 +21,7 @@ class ActorCriticLearner:
         self.agent_optimiser = Adam(params=self.agent_params, lr=args.lr)
 
         self.critic = critic_resigtry[args.critic_type](scheme, args)
-        self.target_critic = copy.deepcopy(self.critic)
+        self.target_critic = critic_resigtry[args.critic_type](scheme, args)
 
         self.critic_params = list(self.critic.parameters())
         self.critic_optimiser = Adam(params=self.critic_params, lr=args.lr)
