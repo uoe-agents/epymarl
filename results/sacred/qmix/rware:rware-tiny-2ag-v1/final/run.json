@@ -13,17 +13,17 @@
     "name": "pymarl",
     "repositories": [
       {
-        "commit": "ba7cb37401cd3f36d5d20c5730659b907779f6b4",
+        "commit": "6811e20e050c839e2d3b24dc1d28a1a493a48180",
         "dirty": false,
         "url": "https://github.com/hughjazzman/epymarl.git"
       },
       {
-        "commit": "ba7cb37401cd3f36d5d20c5730659b907779f6b4",
+        "commit": "6811e20e050c839e2d3b24dc1d28a1a493a48180",
         "dirty": false,
         "url": "https://github.com/hughjazzman/epymarl.git"
       },
       {
-        "commit": "ba7cb37401cd3f36d5d20c5730659b907779f6b4",
+        "commit": "6811e20e050c839e2d3b24dc1d28a1a493a48180",
         "dirty": false,
         "url": "https://github.com/hughjazzman/epymarl.git"
       }
@@ -43,21 +43,21 @@
       ]
     ]
   },
-  "heartbeat": "2023-03-27T23:07:38.244691",
+  "heartbeat": "2023-03-27T03:50:01.544311",
   "host": {
     "ENV": {},
-    "cpu": "AMD EPYC 7352 24-Core Processor",
+    "cpu": "Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz",
     "gpus": {
-      "driver_version": "495.29.05",
+      "driver_version": "515.86.01",
       "gpus": [
         {
-          "model": "NVIDIA A100-PCIE-40GB",
+          "model": "NVIDIA A100 80GB PCIe",
           "persistence_mode": true,
-          "total_memory": 40536
+          "total_memory": 81920
         }
       ]
     },
-    "hostname": "xgpg7",
+    "hostname": "xgph18",
     "os": [
       "Linux",
       "Linux-5.4.0-135-generic-x86_64-with-glibc2.29"
@@ -105,7 +105,7 @@
   },
   "resources": [],
   "result": null,
-  "start_time": "2023-03-27T11:01:23.673548",
+  "start_time": "2023-03-27T01:54:54.927489",
   "status": "COMPLETED",
-  "stop_time": "2023-03-27T23:07:37.889310"
+  "stop_time": "2023-03-27T03:50:01.514743"
 }

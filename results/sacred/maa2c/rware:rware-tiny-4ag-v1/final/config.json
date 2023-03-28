@@ -12,7 +12,7 @@
   "entropy_coef": 0.01,
   "env": "gymma",
   "env_args": {
-    "key": "rware:rware-tiny-2ag-v1",
+    "key": "rware:rware-tiny-4ag-v1",
     "pretrained_wrapper": null,
     "time_limit": 500
   },
@@ -44,7 +44,7 @@
   "save_model": false,
   "save_model_interval": 50000,
   "save_replay": false,
-  "seed": 988772233,
+  "seed": 666570541,
   "standardise_returns": false,
   "standardise_rewards": true,
   "t_max": 20050000,
