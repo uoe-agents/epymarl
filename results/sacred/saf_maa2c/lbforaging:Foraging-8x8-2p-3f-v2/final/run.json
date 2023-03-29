@@ -1,0 +1,104 @@
+{
+  "artifacts": [],
+  "command": "my_main",
+  "experiment": {
+    "base_dir": "/home/e/e0014172/fyp/epymarl/src",
+    "dependencies": [
+      "munch==2.5.0",
+      "numpy==1.22.0",
+      "PyYAML==5.3.1",
+      "sacred==0.8.2",
+      "torch==1.13.0"
+    ],
+    "mainfile": "main.py",
+    "name": "pymarl",
+    "repositories": [
+      {
+        "commit": "4ff60d38f2af778250355951eadfdcacb179e6a5",
+        "dirty": false,
+        "url": "https://github.com/hughjazzman/epymarl.git"
+      },
+      {
+        "commit": "4ff60d38f2af778250355951eadfdcacb179e6a5",
+        "dirty": false,
+        "url": "https://github.com/hughjazzman/epymarl.git"
+      },
+      {
+        "commit": "4ff60d38f2af778250355951eadfdcacb179e6a5",
+        "dirty": false,
+        "url": "https://github.com/hughjazzman/epymarl.git"
+      }
+    ],
+    "sources": [
+      [
+        "main.py",
+        "_sources/main_10bb275063c412d8d7ce9641d9c0d4b0.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_79ab728956cdd749855c86ef08770541.py"
+      ],
+      [
+        "utils/logging.py",
+        "_sources/logging_7799699b534f806632c1d618a6ef7e02.py"
+      ]
+    ]
+  },
+  "heartbeat": "2023-03-28T19:08:50.778630",
+  "host": {
+    "ENV": {},
+    "cpu": "AMD EPYC 7352 24-Core Processor",
+    "gpus": {
+      "driver_version": "510.108.03",
+      "gpus": [
+        {
+          "model": "NVIDIA A100-PCIE-40GB",
+          "persistence_mode": false,
+          "total_memory": 40960
+        }
+      ]
+    },
+    "hostname": "xgpg9",
+    "os": [
+      "Linux",
+      "Linux-5.4.0-135-generic-x86_64-with-glibc2.29"
+    ],
+    "python_version": "3.8.10"
+  },
+  "meta": {
+    "command": "my_main",
+    "options": {
+      "--beat-interval": null,
+      "--capture": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print-config": false,
+      "--priority": null,
+      "--queue": false,
+      "--s3": null,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "env_args.time_limit=25",
+        "env_args.key=lbforaging:Foraging-8x8-2p-3f-v2"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "result": null,
+  "start_time": "2023-03-28T06:42:10.850742",
+  "status": "COMPLETED",
+  "stop_time": "2023-03-28T19:08:50.681339"
+}
