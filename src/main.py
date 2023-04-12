@@ -93,7 +93,7 @@ if __name__ == '__main__':
         map_name = config_dict["env_args"]["map_name"]
     except:
         map_name = config_dict["env_args"]["key"]
-
+    map_name = "".join(x if (x.isalnum() or (x == "-")) else '_' for x in map_name)
 
     # now add all the config to sacred
     ex.add_config(config_dict)
