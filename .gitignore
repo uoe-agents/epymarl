@@ -250,3 +250,4 @@ $RECYCLE.BIN/
 3rdparty
 __MACOSX
 results
+*.out

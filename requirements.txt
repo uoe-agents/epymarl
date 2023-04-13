@@ -20,7 +20,7 @@ pysc2==3.0.0
 pytest==4.3.1
 python-dateutil==2.7.3
 PyYAML==5.3.1
-requests==2.19.1
+requests==2.28.2
 rware
 s2clientprotocol==4.10.1.75800.0
 sacred
@@ -29,11 +29,11 @@ six==1.11.0
 sk-video==1.1.10
 snakeviz
 tensorboard-logger
-torch==1.9.0
-torchvision==0.10.0
+torch==1.13.0
+torchvision==0.14.0
 tornado==5.1.1
-urllib3==1.23
-websocket-client==0.53.0
+urllib3==1.26.14
+websocket-client==1.5.1
 whichcraft==0.5.2
-wrapt==1.10.11
+wrapt==1.12.1
 git+https://github.com/oxwhirl/smac.git

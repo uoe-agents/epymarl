@@ -1,5 +1,4 @@
-# Default SAF on MAPPO 
-# --- MAPPO specific parameters ---
+# --- Central-V specific parameters ---
 
 action_selector: "soft_policies"
 mask_before_softmax: True
@@ -20,16 +19,15 @@ obs_last_action: False
 obs_individual_obs: False
 
 agent_output_type: "pi_logits"
-learner: "ppo_learner"
+learner: "actor_critic_learner"
 entropy_coef: 0.01
 use_rnn: False
 standardise_returns: False
-standardise_rewards: False
+standardise_rewards: True
 q_nstep: 5 # 1 corresponds to normal r + gammaV
 critic_type: "cv_critic_sk"
-epochs: 4
-eps_clip: 0.2
-name: "saf"
+
+name: "saf_maa2c"
 
 t_max: 20050000
 

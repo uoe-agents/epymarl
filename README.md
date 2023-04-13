@@ -38,7 +38,7 @@ To install these please visit:
 
 Example of using LBF:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
 ```
 Example of using RWARE:
 ```sh
@@ -87,7 +87,7 @@ To register a custom environment with Gym, use the template below (taken from Le
 ```python
 from gym.envs.registration import registry, register, make, spec
 register(
-  id="Foraging-8x8-2p-3f-v1",                     # Environment ID.
+  id="Foraging-8x8-2p-3f-v2",                     # Environment ID.
   entry_point="lbforaging.foraging:ForagingEnv",  # The entry point for the environment class
   kwargs={
             ...                                   # Arguments that go to ForagingEnv's __init__ function.
@@ -98,7 +98,7 @@ register(
 # Run an experiment on a Gym environment
 
 ```shell
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
 ```
  In the above command `--env-config=gymma` (in constrast to `sc2` will use a Gym compatible wrapper). `env_args.time_limit=50` sets the maximum episode length to 50 and `env_args.key="..."` provides the Gym's environment ID. In the ID, the `lbforaging:` part is the module name (i.e. `import lbforaging` will run automatically).
 
