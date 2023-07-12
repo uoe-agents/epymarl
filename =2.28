@@ -1,0 +1,5 @@
+Requirement already satisfied: requests in /home/nono/.conda/envs/epymarl_env/lib/python3.8/site-packages (2.19.1)
+Requirement already satisfied: chardet<3.1.0,>=3.0.2 in /home/nono/.conda/envs/epymarl_env/lib/python3.8/site-packages (from requests) (3.0.4)
+Requirement already satisfied: idna<2.8,>=2.5 in /home/nono/.conda/envs/epymarl_env/lib/python3.8/site-packages (from requests) (2.7)
+Requirement already satisfied: urllib3<1.24,>=1.21.1 in /home/nono/.conda/envs/epymarl_env/lib/python3.8/site-packages (from requests) (1.23)
+Requirement already satisfied: certifi>=2017.4.17 in /home/nono/.conda/envs/epymarl_env/lib/python3.8/site-packages (from requests) (2023.5.7)

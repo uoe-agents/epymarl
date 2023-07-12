@@ -35,6 +35,9 @@ To install these please visit:
 - [Level Based Foraging](https://github.com/uoe-agents/lb-foraging) or install with `pip install lbforaging`
 - [Multi-Robot Warehouse](https://github.com/uoe-agents/robotic-warehouse) or install with `pip install rware`
 - [Our fork of MPE](https://github.com/semitable/multiagent-particle-envs), clone it and install it with `pip install -e .`
+```sh
+pip install git+https://github.com/oxwhirl/smac.git
+```
 
 Example of using LBF:
 ```sh
@@ -98,7 +101,7 @@ register(
 # Run an experiment on a Gym environment
 
 ```shell
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
 ```
  In the above command `--env-config=gymma` (in constrast to `sc2` will use a Gym compatible wrapper). `env_args.time_limit=50` sets the maximum episode length to 50 and `env_args.key="..."` provides the Gym's environment ID. In the ID, the `lbforaging:` part is the module name (i.e. `import lbforaging` will run automatically).
 
