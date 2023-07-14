@@ -1,3 +1,4 @@
+# code heavily adapted from https://github.com/AnujMahajanOxf/MAVEN
 import copy
 from components.episode_buffer import EpisodeBatch
 from modules.critics.coma import COMACritic

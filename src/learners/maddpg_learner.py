@@ -1,3 +1,4 @@
+# code heavily adapted from https://github.com/oxwhirl/facmac/
 import copy
 from components.episode_buffer import EpisodeBatch
 from modules.critics.maddpg import MADDPGCritic

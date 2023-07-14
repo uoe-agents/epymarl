@@ -1,3 +1,4 @@
+# code heavily adapted from https://github.com/AnujMahajanOxf/MAVEN
 import copy
 from components.episode_buffer import EpisodeBatch
 from modules.critics.coma import COMACritic
@@ -50,11 +51,6 @@ class PPOLearner:
             self.rew_ms.update(rewards)
             rewards = (rewards - self.rew_ms.mean) / th.sqrt(self.rew_ms.var)
 
-        # No experiences to train on in this minibatch
-        if mask.sum() == 0:
-            self.logger.log_stat("Mask_Sum_Zero", 1, t_env)
-            self.logger.console_logger.error("Actor Critic Learner: mask.sum() == 0 at t_env {}".format(t_env))
-            return
 
         mask = mask.repeat(1, 1, self.n_agents)
 

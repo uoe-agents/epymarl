@@ -1,3 +1,5 @@
+# code heavily adapted from https://github.com/AnujMahajanOxf/MAVEN
+
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
