@@ -1,4 +1,4 @@
-# code heavily adapted from https://github.com/AnujMahajanOxf/MAVEN
+# code adapted from https://github.com/AnujMahajanOxf/MAVEN
 
 import torch as th
 import torch.nn as nn
