@@ -21,7 +21,7 @@ mac: "non_shared_mac"
 agent: "rnn_ns"
 
 agent_output_type: "pi_logits"
-learner: "pac_sarsa_dcg_learner"
+learner: "pac_dcg_learner"
 use_rnn: False
 standardise_rewards: False
 q_nstep: 10 # 1 corresponds to normal r + gammaV

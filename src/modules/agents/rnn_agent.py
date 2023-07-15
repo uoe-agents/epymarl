@@ -1,3 +1,5 @@
+# code adapted from https://github.com/wendelinboehmer/dcg
+
 import torch.nn as nn
 import torch.nn.functional as F
 
