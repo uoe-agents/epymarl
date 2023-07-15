@@ -9,8 +9,7 @@ from modules.critics.mlp import MLP
 def generate_other_actions(n_actions, n_agents, device):
 
 
-    # print(avail_actions.shape)
-    # ^ batch n_steps agents actions
+
     other_acts = [
         th.cat(x) for x in product(*[th.eye(n_actions, device=device) for _ in range(n_agents - 1)])
     ]
@@ -96,10 +95,7 @@ class PACCriticNS(nn.Module):
 
         inputs = th.cat(inputs, dim=-1)
 
-        if self.args.use_subsampling:
-            other_actions = self._gen_subsample_other_actions(batch, bs, max_t, self.args.sample_size)
-        else:
-            other_actions = self._gen_all_other_actions(batch, bs, max_t)
+        other_actions = self._gen_all_other_actions(batch, bs, max_t)
 
         n_other_actions = other_actions.size(3)
 
