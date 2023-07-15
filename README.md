@@ -20,7 +20,8 @@ Pareto-AC works especially well in environments with multiple suboptimal equilib
 
 To run Pareto-AC in an environment, for example the Penalty game, you can run:
 ```
-python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0 ```
+python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
+```
 
 # Table of Contents
 - [Extended Python MARL framework - EPyMARL](#extended-python-marl-framework---epymarl)
