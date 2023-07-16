@@ -27,7 +27,7 @@ class EpisodeBatch:
             self.data.episode_data = {}
             self._setup_data(self.scheme, self.groups, batch_size, max_seq_length, self.preprocess)
 
-    def _setup_data(self, scheme, groups, batch_size, max_seq_length, preprocess):
+    def _setup_data(self, scheme, groups, batch_size, max_seq_length, preprocess=None):
         if preprocess is not None:
             for k in preprocess:
                 assert k in scheme
