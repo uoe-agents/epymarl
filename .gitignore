@@ -10,6 +10,7 @@
 
 # KDE directory preferences
 .directory
+results/
 
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
@@ -27,6 +28,7 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.DS_Store 
 
 # Generated files
 .idea/**/contentModel.xml
@@ -56,8 +58,6 @@
 
 # CMake
 cmake-build-*/
-
-/results
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml

@@ -110,6 +110,7 @@ class QLearner:
 
         # 0-out the targets that came from padded data
         masked_td_error = td_error * mask
+        #print("masked_td_error:", masked_td_error.shape)
 
         # Normal L2 loss, take mean over actual data
         loss = (masked_td_error ** 2).sum() / mask.sum()
@@ -135,6 +136,8 @@ class QLearner:
             self.logger.log_stat("q_taken_mean", (chosen_action_qvals * mask).sum().item()/(mask_elems * self.args.n_agents), t_env)
             self.logger.log_stat("target_mean", (targets * mask).sum().item()/(mask_elems * self.args.n_agents), t_env)
             self.log_stats_t = t_env
+
+        return masked_td_error
 
     def _update_targets_hard(self):
         self.target_mac.load_state(self.mac)

@@ -12,8 +12,8 @@ Pillow
 pluggy==0.7.1
 portpicker==1.2.0
 probscale
-protobuf==3.19.5 #3.6.1
-py==1.6.0
+protobuf #==3.6.1
+py#==1.6.0
 pygame
 pyparsing==2.2.2
 pysc2==3.0.0
@@ -37,3 +37,4 @@ websocket-client==0.53.0
 whichcraft==0.5.2
 wrapt==1.10.11
 git+https://github.com/oxwhirl/smac.git
+einops

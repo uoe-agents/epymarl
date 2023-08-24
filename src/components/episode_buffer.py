@@ -27,7 +27,7 @@ class EpisodeBatch:
             self.data.episode_data = {}
             self._setup_data(self.scheme, self.groups, batch_size, max_seq_length, self.preprocess)
 
-    def _setup_data(self, scheme, groups, batch_size, max_seq_length, preprocess):
+    def _setup_data(self, scheme, groups, batch_size, max_seq_length, preprocess=None):
         if preprocess is not None:
             for k in preprocess:
                 assert k in scheme
@@ -232,13 +232,13 @@ class ReplayBuffer(EpisodeBatch):
     def can_sample(self, batch_size):
         return self.episodes_in_buffer >= batch_size
 
-    def sample(self, batch_size):
+    def sample(self, batch_size, priorities=None):
         assert self.can_sample(batch_size)
         if self.episodes_in_buffer == batch_size:
             return self[:batch_size]
         else:
             # Uniform sampling only atm
-            ep_ids = np.random.choice(self.episodes_in_buffer, batch_size, replace=False)
+            ep_ids = np.random.choice(self.episodes_in_buffer, batch_size, replace=False, p=priorities)
             return self[ep_ids]
 
     def __repr__(self):
