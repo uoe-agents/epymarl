@@ -1,0 +1,17 @@
+env: "myenvs:Water-bomber-v1"
+gamma: 0.9
+lr: 0.01
+agent: "rnn"
+
+env_args:
+  key: null
+  time_limit: 20
+  pretrained_wrapper: null
+
+test_greedy: True
+test_nepisode: 100
+test_interval: 1000
+log_interval: 1000
+runner_log_interval: 1000
+learner_log_interval: 1000
+t_max: 50000

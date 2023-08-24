@@ -160,7 +160,7 @@ class WaterBomberEnv(Env):
 
   def _compute_reward(self):
     if np.all([self.has_finished[a] for a in self.agents]):
-      return 1.0/self.reward_opti 
+      return 1.0/(self.reward_opti*self.n_agents)
     else:
       return 0.0 
 
