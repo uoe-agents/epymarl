@@ -42,6 +42,9 @@ python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env
 For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers.
 To install the codebase, clone this repo and install the `requirements.txt`.  
 
+pip install torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
+
+pip install torch-scatter -f https://data.pyg.org/whl/torch-2.0.0+${cu118}.html
 ## Installing LBF, RWARE, and MPE
 
 In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce and benchmark algorithms in Level-Based Foraging, Multi-Robot Warehouse and Multi-agent Particle environments.
@@ -53,9 +56,13 @@ To install these please visit:
 pip install git+https://github.com/oxwhirl/smac.git
 ```
 
+Example of using SMAC:
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
+```
 Example of using LBF:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
 ```
 Example of using RWARE:
 ```sh
@@ -189,3 +196,6 @@ In BibTeX format:
 # License
 All the source code that has been taken from the PyMARL repository was licensed (and remains so) under the Apache License v2.0 (included in `LICENSE` file).
 Any new code is also licensed under the Apache License v2.0
+
+
+tensorboard --logdir=/home/nono/Documents/Dassault/epymarl --port 6008

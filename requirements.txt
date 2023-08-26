@@ -6,7 +6,7 @@ imageio
 lbforaging
 matplotlib
 mpyq
-numpy
+numpy==1.23.1
 pbr
 Pillow
 pluggy

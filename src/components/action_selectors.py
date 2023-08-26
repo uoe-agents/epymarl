@@ -58,7 +58,13 @@ class EpsilonGreedyActionSelector():
         random_actions = Categorical(avail_actions.float()).sample().long()
 
         picked_actions = pick_random * random_actions + (1 - pick_random) * masked_q_values.max(dim=2)[1]
-        return picked_actions
+        if test_mode:
+            epsilon = th.tensor([[0.0]], device=self.args.device)
+            pick_random = th.zeros_like(pick_random, device=self.args.device)
+        else:
+            epsilon = th.tensor([[self.epsilon]], device=self.args.device)
+        
+        return picked_actions, epsilon, pick_random
 
 
 REGISTRY["epsilon_greedy"] = EpsilonGreedyActionSelector

@@ -2,7 +2,7 @@ from envs import REGISTRY as env_REGISTRY
 from functools import partial
 from components.episode_buffer import EpisodeBatch
 import numpy as np
-
+#import pprint
 
 class EpisodeRunner:
 
@@ -60,12 +60,13 @@ class EpisodeRunner:
                 "obs": [self.env.get_obs()],
                 "priority":[(1.0,)],
             }
-
             self.batch.update(pre_transition_data, ts=self.t)
 
             # Pass the entire batch of experiences up till now to the agents
             # Receive the actions for each agent at this timestep in a batch of size 1
-            actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+            actions, epsilon, pick_random = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+
+            #pprint.pprint(pre_transition_data)
 
             reward, terminated, env_info = self.env.step(actions[0])
             if test_mode and self.args.render:
@@ -74,9 +75,14 @@ class EpisodeRunner:
 
             post_transition_data = {
                 "actions": actions,
+                "epsilon": epsilon,
+                "pick_random": pick_random,
                 "reward": [(reward,)],
                 "terminated": [(terminated != env_info.get("episode_limit", False),)],
             }
+
+            #pprint.pprint(post_transition_data)
+            #print()
 
             self.batch.update(post_transition_data, ts=self.t)
 
@@ -92,7 +98,7 @@ class EpisodeRunner:
         self.batch.update(last_data, ts=self.t)
 
         # Select actions in the last stored state
-        actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+        actions, _, _ = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
         self.batch.update({"actions": actions}, ts=self.t)
 
         cur_stats = self.test_stats if test_mode else self.train_stats

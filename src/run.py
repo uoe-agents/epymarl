@@ -15,12 +15,10 @@ from controllers import REGISTRY as mac_REGISTRY
 from components.episode_buffer import ReplayBuffer
 from components.transforms import OneHot
 
-
 def run(_run, _config, _log):
 
     # check args sanity
     _config = args_sanity_check(_config, _log)
-
     args = SN(**_config)
     args.device = "cuda" if args.use_cuda else "cpu"
 
@@ -103,9 +101,12 @@ def run_sequential(args, logger):
             "dtype": th.int,
         },
         "reward": {"vshape": (1,)},
+        "epsilon": {"vshape": (1,)},
+        "pick_random": {"vshape": (env_info["n_agents"],)},
         "priority": {"vshape": (1,)},
         "terminated": {"vshape": (1,), "dtype": th.uint8},
     }
+    pprint.pprint(scheme)
     groups = {"agents": args.n_agents}
     preprocess = {"actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])}
 

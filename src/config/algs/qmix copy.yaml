@@ -9,8 +9,7 @@ evaluation_epsilon: 0.0
 
 runner: "episode"
 
-batch_size: 512 #2048
-buffer_size: 100000
+buffer_size: 5000
 
 # update the target network every {} episodes
 target_update_interval_or_tau: 200
