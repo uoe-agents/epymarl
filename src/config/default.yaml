@@ -13,8 +13,8 @@ log_interval: 2000 # Log summary of stats after every {} timesteps
 runner_log_interval: 2000 # Log runner stats (not test stats) every {} timesteps
 learner_log_interval: 2000 # Log training stats every {} timesteps
 t_max: 10000 # Stop running after this many timesteps
-use_cuda: True # Use gpu by default unless it isn't available
-buffer_cpu_only: True # If true we won't keep all of the replay buffer in vram
+use_cuda: True   # Use gpu by default unless it isn't available
+buffer_cpu_only: False # If true we won't keep all of the replay buffer in vram
 
 # --- Logging options ---
 use_tensorboard: True # Log results to tensorboard
