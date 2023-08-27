@@ -78,16 +78,10 @@ class BasicMAC:
         if self.args.obs_agent_id:
             inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
         if self.args.obs_epsilon:
-            if t == 0:
-                inputs.append(th.zeros_like(batch["epsilon"][:, t].repeat(self.n_agents, 1), device=batch.device))
-            else:
-                inputs.append(th.tensor(batch["epsilon"][:, t-1].repeat(self.n_agents, 1), device=batch.device))
+            inputs.append(th.tensor(batch["epsilon"][:, t].repeat(self.n_agents, 1), device=batch.device))
         if self.args.obs_explo:
             remove_self_explo = lambda a: th.cat([th.cat((a[...,:i], a[...,i+1:]), 1) for i in range(a.shape[-1])])
-            if t == 0:
-                inputs.append(th.zeros_like(remove_self_explo(batch["pick_random"][:, t]), device=batch.device))
-            else:
-                inputs.append(th.tensor(remove_self_explo(batch["pick_random"][:, t-1]), device=batch.device))
+            inputs.append(th.tensor(remove_self_explo(batch["pick_random"][:, t]), device=batch.device))
 
         inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
         #print("inputs", inputs)
