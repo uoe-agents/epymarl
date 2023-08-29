@@ -8,6 +8,7 @@ from types import SimpleNamespace as SN
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
 from os.path import dirname, abspath
+import numpy as np
 
 from learners import REGISTRY as le_REGISTRY
 from runners import REGISTRY as r_REGISTRY
@@ -184,7 +185,7 @@ def run_sequential(args, logger):
     last_time = start_time
     evaluation_times = []
     mean_episodes_return = []
-    std_eisodes_return = []
+    std_episodes_return = []
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
     while runner.t_env <= args.t_max:
