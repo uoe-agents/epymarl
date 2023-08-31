@@ -1,0 +1,34 @@
+# --- COMA specific parameters ---
+
+action_selector: "soft_policies"
+mask_before_softmax: True
+
+runner: "parallel"
+
+buffer_size: 10
+batch_size_run: 10
+batch_size: 10
+
+# update the target network every {} training steps
+target_update_interval_or_tau: 200
+
+lr: 0.0003
+
+obs_agent_id: False
+obs_last_action: False
+obs_individual_obs: False
+
+mac: "non_shared_mac"
+agent: "rnn_ns"
+agent_output_type: "pi_logits"
+learner: "actor_critic_learner"
+entropy_coef: 0.01
+use_rnn: False
+standardise_returns: False
+standardise_rewards: True
+q_nstep: 5 # 1 corresponds to normal r + gammaV
+critic_type: "cv_critic_ns"
+
+name: "maa2c_ns"
+
+t_max: 20050000

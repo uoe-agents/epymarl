@@ -1,0 +1,39 @@
+# --- Central-V specific parameters ---
+
+action_selector: "soft_policies"
+mask_before_softmax: True
+
+runner: "parallel"
+
+buffer_size: 10
+batch_size_run: 10
+batch_size: 10
+
+# update the target network every {} training steps
+target_update_interval_or_tau: 0.01
+
+lr: 0.0003
+
+obs_agent_id: False
+obs_last_action: False
+obs_individual_obs: False
+
+mac: "non_shared_mac"
+agent: "rnn_ns"
+
+agent_output_type: "pi_logits"
+learner: "pac_learner"
+initial_entropy_coef: 20.0
+final_entropy_coef: 0.01
+entropy_end_ratio: 0.8
+use_rnn: False
+standardise_rewards: False
+q_nstep: 10 # 1 corresponds to normal r + gammaV
+
+
+critic_type: "pac_critic_ns"
+state_value_type: "cv_critic_ns"
+
+name: "pac_sarsa_ns"
+
+t_max: 500500
