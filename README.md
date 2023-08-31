@@ -58,7 +58,7 @@ pip install git+https://github.com/oxwhirl/smac.git
 
 Example of using SMAC:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
+python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=2s3z
 ```
 Example of using LBF:
 ```sh
@@ -198,4 +198,4 @@ All the source code that has been taken from the PyMARL repository was licensed 
 Any new code is also licensed under the Apache License v2.0
 
 
-tensorboard --logdir=/home/nono/Documents/Dassault/epymarl --port 6008
+tensorboard --logdir=/home/nono/Documents/Dassault/epymarl/results/tb_logs --port 6008

@@ -14,7 +14,7 @@ runner_log_interval: 2000 # Log runner stats (not test stats) every {} timesteps
 learner_log_interval: 2000 # Log training stats every {} timesteps
 t_max: 10000 # Stop running after this many timesteps
 use_cuda: True   # Use gpu by default unless it isn't available
-buffer_cpu_only: False # If true we won't keep all of the replay buffer in vram
+buffer_cpu_only: True # If true we won't keep all of the replay buffer in vram
 
 # --- Logging options ---
 use_tensorboard: True # Log results to tensorboard
@@ -29,7 +29,7 @@ local_results_path: "results" # Path for local results
 
 # --- RL hyperparameters ---
 gamma: 0.99
-batch_size: 32 # Number of episodes to train on
+batch_size: 1024 # Number of episodes to train on
 buffer_size: 32 # Size of the replay buffer
 lr: 0.0005 # Learning rate for agents
 optim_alpha: 0.99 # RMSProp alpha
@@ -44,7 +44,7 @@ obs_agent_id: True # Include the agent's one_hot id in the observation
 obs_last_action: True # Include the agent's last action (one_hot) in the observation
 obs_epsilon: True
 obs_explo: True 
-
+seed: 0
 
 # --- Experiment running params ---
 repeat_id: 1

@@ -26,7 +26,7 @@ env_args:
   state_last_action: False
   state_timestep_number: False
   step_mul: 8
-  seed: null
+  seed: 0
   heuristic_ai: False
   heuristic_rest: False
   debug: False
@@ -37,4 +37,4 @@ test_interval: 50000
 log_interval: 50000
 runner_log_interval: 10000
 learner_log_interval: 10000
-t_max: 2050000
+t_max: 405000 #2050000

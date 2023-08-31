@@ -9,6 +9,7 @@ from utils.logging import Logger
 from utils.timehelper import time_left, time_str
 from os.path import dirname, abspath
 import numpy as np
+import pandas as pd
 
 from learners import REGISTRY as le_REGISTRY
 from runners import REGISTRY as r_REGISTRY
