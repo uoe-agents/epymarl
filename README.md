@@ -1,4 +1,4 @@
-	# Extended Python MARL framework - EPyMARL
+# Extended Python MARL framework - EPyMARL
 
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
 - Additional algorithms (IA2C, IPPO, MADDPG, MAA2C and MAPPO)
