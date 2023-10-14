@@ -11,9 +11,9 @@ See our blog post here: https://agents.inf.ed.ac.uk/blog/epymarl/
 
 
 ## Update as of *15th July 2023*!
-We have released our _Pareto Actor-Critic_ algorithm as part of the E-PyMARL source code. 
+We have released our _Pareto Actor-Critic_ algorithm, accepted in TMLR, as part of the E-PyMARL source code. 
 
-Find the preprint here: https://arxiv.org/abs/2209.14344
+Find the paper here: https://arxiv.org/abs/2209.14344
 
 Pareto-AC (Pareto-AC), is an actor-critic algorithm that utilises a simple principle of no-conflict games (and, in turn, cooperative games with identical rewards): each agent can assume the others will choose actions that will lead to a Pareto-optimal equilibrium.
 Pareto-AC works especially well in environments with multiple suboptimal equilibria (a problem is also known as relative over-generalisation). We have seen impressive results in a diverse set of multi-agent games with suboptimal equilibria, including the matrix games of the MARL benchmark, but also LBF variations with high penalties.
