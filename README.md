@@ -28,6 +28,7 @@ python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env
 - [Table of Contents](#table-of-contents)
 - [Installation & Run instructions](#installation--run-instructions)
   - [Installing LBF, RWARE, and MPE](#installing-lbf-rware-and-mpe)
+  - [Installing MARBLER for Sim2Real Evaluation](#installing-marbler)
   - [Using A Custom Gym Environment](#using-a-custom-gym-environment)
 - [Run an experiment on a Gym environment](#run-an-experiment-on-a-gym-environment)
 - [Run a hyperparameter search](#run-a-hyperparameter-search)
@@ -89,6 +90,14 @@ and
 python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleTag-v0" env_args.pretrained_wrapper="PretrainedTag"
 ```
 
+## Installing MARBLER
+
+[MARBLER](https://github.com/GT-STAR-Lab/MARBLER) is a gym built for [the Robotarium](https://www.robotarium.gatech.edu) to enable free and effortless Sim2Real evaluation of algorithms. Clone it and follow the instructions on its Github to install it.
+
+Example of using MARBLER:
+```sh
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=10000 env_args.key="robotarium_gym:PredatorCapturePrey-v0"
+```
 
 ## Using A Custom Gym Environment
 
