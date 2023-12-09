@@ -1,6 +1,7 @@
 absl-py
 attrs
 gym==0.21.0
+pyglet==1.5.0
 idna==2.7
 imageio
 lbforaging

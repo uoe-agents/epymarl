@@ -91,7 +91,7 @@ class _GymmaWrapper(MultiAgentEnv):
         self._obs = None
         self._info = None
 
-        self.longest_action_space = max(self._env.action_space, key=lambda x: x.n)
+        self.longest_action_space = max(self._env.action_space, key=lambda x: flatdim(x))
         self.longest_observation_space = max(
             self._env.observation_space, key=lambda x: x.shape
         )
@@ -150,7 +150,7 @@ class _GymmaWrapper(MultiAgentEnv):
     def get_avail_agent_actions(self, agent_id):
         """ Returns the available actions for agent_id """
         valid = flatdim(self._env.action_space[agent_id]) * [1]
-        invalid = [0] * (self.longest_action_space.n - len(valid))
+        invalid = [0] * (flatdim(self.longest_action_space) - len(valid))
         return valid + invalid
 
     def get_total_actions(self):
