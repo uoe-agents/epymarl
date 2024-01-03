@@ -142,7 +142,6 @@ class MADDPGLearner:
             self.logger.log_stat("q_taken_mean", (q_taken).sum().item() / mask_elems, t_env)
             self.logger.log_stat("target_mean", targets.sum().item() / mask_elems, t_env)
             self.logger.log_stat("pg_loss", pg_loss.item(), t_env)
-            self.logger.log_stat("agent_grad_norm", agent_grad_norm, t_env)
             self.log_stats_t = t_env
 
     def _build_inputs(self, batch, t=None):
