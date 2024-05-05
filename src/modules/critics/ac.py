@@ -26,16 +26,22 @@ class ACCritic(nn.Module):
         # make hidden states on same device as model
         return self.fc1.weight.new(1, self.args.hidden_dim).zero_()
 
-    def forward(self, hidden_state, batch, t=None):
+    def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
-        x = F.relu(self.fc1(inputs))
-        h_in = hidden_state.reshape(-1, self.args.hidden_dim)
         if self.args.use_rnn:
-            h = self.rnn(x, h_in)
-        else:
-            h = F.relu(self.rnn(x))
-        q = self.fc3(x)
-        return q, h
+            h = self.init_hidden()
+        # make empty torch arrya for qs and hs
+        qs = []
+        for input in inputs:
+            x = F.relu(self.fc1(input))
+            if self.args.use_rnn:
+                h = self.rnn(x, h)
+            else:
+                h = F.relu(self.rnn(x))
+            q = self.fc3(x)
+            qs.append(q)
+        q = th.stack(qs, dim=1)
+        return q
 
     def _build_inputs(self, batch, t=None):
         bs = batch.batch_size
