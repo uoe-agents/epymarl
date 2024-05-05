@@ -16,16 +16,26 @@ class ACCritic(nn.Module):
 
         # Set up network layers
         self.fc1 = nn.Linear(input_shape, args.hidden_dim)
-        self.fc2 = nn.Linear(args.hidden_dim, args.hidden_dim)
+        if self.args.use_rnn:
+            self.rnn = nn.GRUCell(args.hidden_dim, args.hidden_dim)
+        else:
+            self.rnn = nn.Linear(args.hidden_dim, args.hidden_dim)
         self.fc3 = nn.Linear(args.hidden_dim, 1)
-        
 
-    def forward(self, batch, t=None):
+    def init_hidden(self):
+        # make hidden states on same device as model
+        return self.fc1.weight.new(1, self.args.hidden_dim).zero_()
+
+    def forward(self, hidden_state, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
         x = F.relu(self.fc1(inputs))
-        x = F.relu(self.fc2(x))
+        h_in = hidden_state.reshape(-1, self.args.hidden_dim)
+        if self.args.use_rnn:
+            h = self.rnn(x, h_in)
+        else:
+            h = F.relu(self.rnn(x))
         q = self.fc3(x)
-        return q
+        return q, h
 
     def _build_inputs(self, batch, t=None):
         bs = batch.batch_size
