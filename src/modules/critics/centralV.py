@@ -18,7 +18,7 @@ class CentralVCritic(nn.Module):
 
         # Set up network layers
         self.fc1 = nn.Linear(input_shape, args.hidden_dim)
-        if self.args.use_rnn:
+        if self.args.use_critic_rnn:
             self.rnn = nn.GRUCell(args.hidden_dim, args.hidden_dim)
         else:
             self.rnn = nn.Linear(args.hidden_dim, args.hidden_dim)
@@ -30,13 +30,13 @@ class CentralVCritic(nn.Module):
 
     def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
-        if self.args.use_rnn:
+        if self.args.use_critic_rnn:
             h = self.init_hidden()
         # make empty torch arrya for qs
         qs = []
         for input in inputs:
             x = F.relu(self.fc1(input))
-            if self.args.use_rnn:
+            if self.args.use_critic_rnn:
                 h = self.rnn(x, h)
             else:
                 h = F.relu(self.rnn(x))
