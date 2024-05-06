@@ -30,9 +30,11 @@ class CentralVCritic(nn.Module):
 
     def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
+        # reshape inputs and initialize hidden states
+        inputs = inputs.view(max_t, bs*self.n_agents, -1)
         if self.args.use_critic_rnn:
-            h = self.init_hidden()
-        # make empty torch arrya for qs
+            h = self.init_hidden().repeat(bs*self.n_agents, 1)
+        # rollout through max_t steps to get values
         qs = []
         for input in inputs:
             x = F.relu(self.fc1(input))
@@ -42,7 +44,7 @@ class CentralVCritic(nn.Module):
                 h = F.relu(self.rnn(x))
             q = self.fc3(x)
             qs.append(q)
-        q = th.stack(qs, dim=1)
+        q = th.stack(qs).view(bs, max_t, self.n_agents, 1)
         return q
 
     def _build_inputs(self, batch, t=None):
