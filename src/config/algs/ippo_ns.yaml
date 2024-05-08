@@ -26,6 +26,7 @@ entropy_coef: 0.01
 standardise_returns: False
 standardise_rewards: True
 use_rnn: False
+use_critic_rnn: False
 epochs: 4
 eps_clip: 0.2
 q_nstep: 5 # 1 corresponds to normal r + gammaV

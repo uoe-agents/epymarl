@@ -24,6 +24,7 @@ agent_output_type: "pi_logits"
 learner: "ppo_learner"
 entropy_coef: 0.01
 use_rnn: False
+use_critic_rnn: False
 standardise_returns: False
 standardise_rewards: True
 q_nstep: 5 # 1 corresponds to normal r + gammaV
