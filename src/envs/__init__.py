@@ -208,8 +208,6 @@ class _GymmaWrapperInd(_GymmaWrapper):
             for o in self._obs
         ]
 
-        # if type(reward) is list:
-        #     reward = sum(reward)
         if type(done) is list:
             done = all(done)
         return reward, done, {}
