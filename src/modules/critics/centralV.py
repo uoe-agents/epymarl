@@ -18,14 +18,33 @@ class CentralVCritic(nn.Module):
 
         # Set up network layers
         self.fc1 = nn.Linear(input_shape, args.hidden_dim)
-        self.fc2 = nn.Linear(args.hidden_dim, args.hidden_dim)
+        if self.args.use_critic_rnn:
+            self.rnn = nn.GRUCell(args.hidden_dim, args.hidden_dim)
+        else:
+            self.rnn = nn.Linear(args.hidden_dim, args.hidden_dim)
         self.fc3 = nn.Linear(args.hidden_dim, 1)
+
+    def init_hidden(self):
+        # make hidden states on same device as model
+        return self.fc1.weight.new(1, self.args.hidden_dim).zero_()
 
     def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
-        x = F.relu(self.fc1(inputs))
-        x = F.relu(self.fc2(x))
-        q = self.fc3(x)
+        # reshape inputs and initialize hidden states
+        inputs = inputs.view(max_t, bs*self.n_agents, -1)
+        if self.args.use_critic_rnn:
+            h = self.init_hidden().repeat(bs*self.n_agents, 1)
+        # rollout through max_t steps to get values
+        qs = []
+        for input in inputs:
+            x = F.relu(self.fc1(input))
+            if self.args.use_critic_rnn:
+                h = self.rnn(x, h)
+            else:
+                h = F.relu(self.rnn(x))
+            q = self.fc3(x)
+            qs.append(q)
+        q = th.stack(qs).view(bs, max_t, self.n_agents, 1)
         return q
 
     def _build_inputs(self, batch, t=None):
