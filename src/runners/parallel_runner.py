@@ -21,7 +21,6 @@ class ParallelRunner:
         env_args = [self.args.env_args.copy() for _ in range(self.batch_size)]
         for i in range(self.batch_size):
             env_args[i]["seed"] += i
-
         self.ps = [Process(target=env_worker, args=(worker_conn, CloudpickleWrapper(partial(env_fn, **env_arg))))
                             for env_arg, worker_conn in zip(env_args, self.worker_conns)]
 
@@ -145,7 +144,10 @@ class ParallelRunner:
                     # Remaining data for this current timestep
                     post_transition_data["reward"].append((data["reward"],))
 
-                    episode_returns[idx] += data["reward"]
+                    if self.args.env == "gymmai":
+                        episode_returns[idx] += sum(data["reward"])
+                    else:
+                        episode_returns[idx] += data["reward"]
                     episode_lengths[idx] += 1
                     if not test_mode:
                         self.env_steps_this_run += 1
