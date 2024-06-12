@@ -5,8 +5,6 @@ import time
 import threading
 import torch as th
 from types import SimpleNamespace as SN
-from utils.logging import Logger
-from utils.timehelper import time_left, time_str
 from os.path import dirname, abspath
 
 from learners import REGISTRY as le_REGISTRY
@@ -14,15 +12,20 @@ from runners import REGISTRY as r_REGISTRY
 from controllers import REGISTRY as mac_REGISTRY
 from components.episode_buffer import ReplayBuffer
 from components.transforms import OneHot
+from utils.general_reward_support import test_alg_config_supports_reward
+from utils.logging import Logger
+from utils.timehelper import time_left, time_str
 
 
 def run(_run, _config, _log):
-
     # check args sanity
     _config = args_sanity_check(_config, _log)
 
     args = SN(**_config)
     args.device = "cuda" if args.use_cuda else "cpu"
+    assert test_alg_config_supports_reward(
+        args
+    ), "The specified algorithm does not support the general reward setup. Please choose a different algorithm or set `common_reward=True`."
 
     # setup loggers
     logger = Logger(_log)
@@ -38,7 +41,9 @@ def run(_run, _config, _log):
         map_name = _config["env_args"]["map_name"]
     except:
         map_name = _config["env_args"]["key"]
-    unique_token = f"{_config['name']}_seed{_config['seed']}_{map_name}_{datetime.datetime.now()}"
+    unique_token = (
+        f"{_config['name']}_seed{_config['seed']}_{map_name}_{datetime.datetime.now()}"
+    )
 
     args.unique_token = unique_token
     if args.use_tensorboard:
@@ -71,7 +76,6 @@ def run(_run, _config, _log):
 
 
 def evaluate_sequential(args, runner):
-
     for _ in range(args.test_nepisode):
         runner.run(test_mode=True)
 
@@ -82,7 +86,6 @@ def evaluate_sequential(args, runner):
 
 
 def run_sequential(args, logger):
-
     # Init runner so we can get env info
     runner = r_REGISTRY[args.runner](args=args, logger=logger)
 
@@ -102,12 +105,13 @@ def run_sequential(args, logger):
             "group": "agents",
             "dtype": th.int,
         },
-        "reward": {"vshape": (1,)},
         "terminated": {"vshape": (1,), "dtype": th.uint8},
     }
     # For individual rewards in gymmai reward is of shape (1, n_agents)
-    if args.env=='gymmai':
-        scheme['reward'] = {'vshape': (args.n_agents,)}
+    if args.common_reward:
+        scheme["reward"] = {"vshape": (1,)}
+    else:
+        scheme["reward"] = {"vshape": (args.n_agents,)}
     groups = {"agents": args.n_agents}
     preprocess = {"actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])}
 
@@ -133,7 +137,6 @@ def run_sequential(args, logger):
         learner.cuda()
 
     if args.checkpoint_path != "":
-
         timesteps = []
         timestep_to_load = 0
 
@@ -183,7 +186,6 @@ def run_sequential(args, logger):
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
     while runner.t_env <= args.t_max:
-
         # Run for a whole episode at a time
         episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
@@ -203,7 +205,6 @@ def run_sequential(args, logger):
         # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
         if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
-
             logger.console_logger.info(
                 "t_env: {} / {}".format(runner.t_env, args.t_max)
             )
@@ -247,7 +248,6 @@ def run_sequential(args, logger):
 
 
 def args_sanity_check(config, _log):
-
     # set CUDA flags
     # config["use_cuda"] = True # Use cuda whenever possible!
     if config["use_cuda"] and not th.cuda.is_available():

@@ -1,5 +1,6 @@
 absl-py
 attrs
+einops
 gym==0.21.0
 idna==2.7
 imageio
@@ -31,6 +32,7 @@ snakeviz
 tensorboard-logger
 torch
 torchvision
+torch_scatter
 tornado==5.1.1
 urllib3==1.23
 websocket-client==0.53.0

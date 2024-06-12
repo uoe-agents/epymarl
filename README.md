@@ -1,6 +1,7 @@
 # Extended Python MARL framework - EPyMARL
 
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
+- **New!** Support for training in environments with individual rewards for all agents (for all algorithms that support such settings)
 - Additional algorithms (IA2C, IPPO, MADDPG, MAA2C and MAPPO)
 - Support for [Gym](https://github.com/openai/gym) environments (on top of the existing SMAC support)
 - Option for no-parameter sharing between agents (original PyMARL only allowed for parameter sharing)
@@ -9,6 +10,17 @@ EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and inc
 
 See our blog post here: https://agents.inf.ed.ac.uk/blog/epymarl/
 
+## Update as of *June 2024*!
+Previously PyMARL and EPyMARL only supported training of MARL algorithms in common-reward environments. To support environments which naturally provide individual rewards for agents (e.g. LBF and RWARE), we previously scalarised the rewards of all agents using a sum operation to obtain a single common reward that was then given to all agents. We are glad to announce that EPyMARL now supports training in general-sum reward environments (for all algorithms that are sound to train in general-sum reward settings)!
+
+- **Algorithms that support general-sum reward envs**: IA2C, IPPO, MAA2C, MAPPO, IQL, PAC
+- Algorithms that only support common-reward envs: COMA, VDN, QMIX, QTRAN
+
+By default, EPyMARL runs experiments with common rewards (as done previously). To run an experiment with individual rewards for all agents, set `common_reward=False`. For example to run MAPPO in a LBF task with individual rewards:
+```sh
+python3 src/main.py --config=mappo --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2" common_reward=False
+```
+When using the `common_reward=True` setup in environments which naturally provide individual rewards, by default we scalarise the rewards into a common reward by summing up all rewards. This is now configurable and we support the mean operation as an alternative scalarisation. To use the mean scalarisation, set `reward_scalarisation="mean"`.
 
 ## Update as of *15th July 2023*!
 We have released our _Pareto Actor-Critic_ algorithm, accepted in TMLR, as part of the E-PyMARL source code. 
@@ -19,8 +31,8 @@ Pareto-AC (Pareto-AC), is an actor-critic algorithm that utilises a simple princ
 Pareto-AC works especially well in environments with multiple suboptimal equilibria (a problem is also known as relative over-generalisation). We have seen impressive results in a diverse set of multi-agent games with suboptimal equilibria, including the matrix games of the MARL benchmark, but also LBF variations with high penalties.
 
 To run Pareto-AC in an environment, for example the Penalty game, you can run:
-```
-python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
+```sh
+python3 main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
 ```
 
 # Table of Contents
@@ -53,7 +65,7 @@ To install these please visit:
 
 Example of using LBF:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
 ```
 Example of using RWARE:
 ```sh
@@ -110,7 +122,7 @@ To register a custom environment with Gym, use the template below (taken from Le
 ```python
 from gym.envs.registration import registry, register, make, spec
 register(
-  id="Foraging-8x8-2p-3f-v1",                     # Environment ID.
+  id="Foraging-8x8-2p-3f-v2",                     # Environment ID.
   entry_point="lbforaging.foraging:ForagingEnv",  # The entry point for the environment class
   kwargs={
             ...                                   # Arguments that go to ForagingEnv's __init__ function.
@@ -121,7 +133,7 @@ register(
 # Run an experiment on a Gym environment
 
 ```shell
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v1"
+python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
 ```
  In the above command `--env-config=gymma` (in constrast to `sc2` will use a Gym compatible wrapper). `env_args.time_limit=50` sets the maximum episode length to 50 and `env_args.key="..."` provides the Gym's environment ID. In the ID, the `lbforaging:` part is the module name (i.e. `import lbforaging` will run automatically).
 
