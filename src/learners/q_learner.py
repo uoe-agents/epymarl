@@ -10,6 +10,7 @@ from components.standarize_stream import RunningMeanStd
 class QLearner:
     def __init__(self, mac, scheme, logger, args):
         self.args = args
+        self.n_agents = args.n_agents
         self.mac = mac
         self.logger = logger
 
