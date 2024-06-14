@@ -30,6 +30,11 @@ Find the paper here: https://arxiv.org/abs/2209.14344
 Pareto-AC (Pareto-AC), is an actor-critic algorithm that utilises a simple principle of no-conflict games (and, in turn, cooperative games with identical rewards): each agent can assume the others will choose actions that will lead to a Pareto-optimal equilibrium.
 Pareto-AC works especially well in environments with multiple suboptimal equilibria (a problem is also known as relative over-generalisation). We have seen impressive results in a diverse set of multi-agent games with suboptimal equilibria, including the matrix games of the MARL benchmark, but also LBF variations with high penalties.
 
+PAC introduces additional dependencies specified in `pac_requirements.txt`. To install its dependencies, run
+```sh
+pip install -r pac_requirements.txt
+```
+
 To run Pareto-AC in an environment, for example the Penalty game, you can run:
 ```sh
 python3 main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
@@ -52,16 +57,35 @@ python3 main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 en
 
 # Installation & Run instructions
 
-For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers.
-To install the codebase, clone this repo and install the `requirements.txt`.  
+For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers. To install the codebase, clone this repo and run:
+```sh
+pip install -r requirements.txt
+```
 
-## Installing LBF, RWARE, and MPE
+Note that the PAC algorithm and environments introduce additional dependencies. To install these dependencies, use the provided requirements files:
+```sh
+# install PAC dependencies
+pip install -r pac_requirements.txt
+# install environments
+pip install -r env_requirements.txt
+```
 
-In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce and benchmark algorithms in Level-Based Foraging, Multi-Robot Warehouse and Multi-agent Particle environments.
-To install these please visit:
+## Installing Environments
+
+In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce the Level-Based Foraging (LBF) and Multi-Robot Warehouse (RWARE) environments, and additionally evaluate in SMAC, Multi-agent Particle environments. and a set of matrix games.
+
+To install all environments, you can use the provided `env_requirements.txt`:
+```sh
+pip install -r env_requirements.txt
+```
+which will install LBF, RWARE, SMAC, our MPE form, and matrix games.
+
+
+To install these individually, please visit:
 - [Level Based Foraging](https://github.com/uoe-agents/lb-foraging) or install with `pip install lbforaging`
 - [Multi-Robot Warehouse](https://github.com/uoe-agents/robotic-warehouse) or install with `pip install rware`
 - [Our fork of MPE](https://github.com/semitable/multiagent-particle-envs), clone it and install it with `pip install -e .`
+- [Matrix games](https://github.com/uoe-agents/matrix-games), clone it and install with `pip install -e .`
 
 Example of using LBF:
 ```sh
