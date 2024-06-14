@@ -1,0 +1,105 @@
+exclude: null
+grid-search:
+  test_nepisode:
+    - 100
+  log_interval:
+    - 50000
+  save_model:
+    - false
+    
+grid-search-groups:
+  env0:
+    - "--env-config": "gymma"
+    - env_args.key: lbforaging:Foraging-10x10-3p-3f-v2
+    - env_args.time_limit: 25
+    - common_reward: True
+    - "--config": "qmix"
+    - t_max: 2050000
+    - test_interval: 50000
+    - hidden_dim: 64
+    - lr: 0.0003
+    - standardise_rewards: True
+    - use_rnn: True
+    - evaluation_epsilon: 0.05
+    - epsilon_anneal_time: 200000
+    - target_update_interval_or_tau: 0.01
+
+  env1:
+    - "--env-config": "gymma"
+    - env_args.key: lbforaging:Foraging-10x10-3p-3f-v2
+    - env_args.time_limit: 25
+    - common_reward: True
+    - "--config": "mappo"
+    - t_max: 10050000
+    - test_interval: 250000
+    - hidden_dim: 128
+    - lr: 0.0003
+    - standardise_rewards: False
+    - use_rnn: False
+    - entropy_coef: 0.001
+    - target_update_interval_or_tau: 0.01
+    - q_nstep: 5
+
+  env2:
+    - "--env-config": "gymma"
+    - env_args.key: rware:rware-tiny-4ag-v1
+    - env_args.time_limit: 500
+    - common_reward: True
+    - "--config": "mappo"
+    - t_max: 20050000
+    - test_interval: 500000
+    - hidden_dim: 128
+    - lr: 0.0005
+    - standardise_rewards: False
+    - use_rnn: False
+    - entropy_coef: 0.001
+    - target_update_interval_or_tau: 0.01
+    - q_nstep: 10
+
+  env3:
+    - "--env-config": "gymma"
+    - env_args.key: lbforaging:Foraging-10x10-3p-3f-v2
+    - env_args.time_limit: 25
+    - common_reward: False
+    - "--config": "iql"
+    - t_max: 2050000
+    - test_interval: 50000
+    - hidden_dim: 128
+    - lr: 0.0003
+    - standardise_rewards: True
+    - use_rnn: True
+    - evaluation_epsilon: 0.05
+    - epsilon_anneal_time: 200000
+    - target_update_interval_or_tau: 200
+
+  env4:
+    - "--env-config": "gymma"
+    - env_args.key: lbforaging:Foraging-10x10-3p-3f-v2
+    - env_args.time_limit: 25
+    - common_reward: False
+    - "--config": "mappo"
+    - t_max: 10050000
+    - test_interval: 250000
+    - hidden_dim: 128
+    - lr: 0.0003
+    - standardise_rewards: False
+    - use_rnn: False
+    - entropy_coef: 0.001
+    - target_update_interval_or_tau: 0.01
+    - q_nstep: 5
+
+  env5:
+    - "--env-config": "gymma"
+    - env_args.key: rware:rware-tiny-4ag-v1
+    - env_args.time_limit: 500
+    - common_reward: False
+    - "--config": "mappo"
+    - t_max: 20050000
+    - test_interval: 500000
+    - hidden_dim: 128
+    - lr: 0.0005
+    - standardise_rewards: False
+    - use_rnn: False
+    - entropy_coef: 0.001
+    - target_update_interval_or_tau: 0.01
+    - q_nstep: 10

@@ -1,9 +1,11 @@
 import copy
-from components.episode_buffer import EpisodeBatch
+
 import torch as th
 from torch.optim import Adam
-from modules.critics import REGISTRY as critic_registry
+
+from components.episode_buffer import EpisodeBatch
 from components.standarize_stream import RunningMeanStd
+from modules.critics import REGISTRY as critic_registry
 
 
 class COMALearner:

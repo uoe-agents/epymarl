@@ -1,11 +1,13 @@
 # code heavily adapted from https://github.com/oxwhirl/facmac/
 import copy
-from components.episode_buffer import EpisodeBatch
+
 import torch as th
 from torch.optim import Adam
+
+from components.episode_buffer import EpisodeBatch
+from components.standarize_stream import RunningMeanStd
 from controllers.maddpg_controller import gumbel_softmax
 from modules.critics import REGISTRY as critic_registry
-from components.standarize_stream import RunningMeanStd
 
 
 class MADDPGLearner:

@@ -1,8 +1,10 @@
 import copy
-from components.episode_buffer import EpisodeBatch
-from modules.mixers.qtran import QTranBase
+
 import torch as th
 from torch.optim import RMSprop
+
+from components.episode_buffer import EpisodeBatch
+from modules.mixers.qtran import QTranBase
 
 
 class QLearner:

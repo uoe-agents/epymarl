@@ -1,7 +1,7 @@
 # code adapted from https://github.com/oxwhirl/facmac/
 import torch as th
 import torch.nn as nn
-import torch.nn.functional as F
+
 from modules.critics.mlp import MLP
 
 
@@ -11,11 +11,15 @@ class MADDPGCriticNS(nn.Module):
         self.args = args
         self.n_actions = args.n_actions
         self.n_agents = args.n_agents
-        self.input_shape = self._get_input_shape(scheme) + self.n_actions * self.n_agents
+        self.input_shape = (
+            self._get_input_shape(scheme) + self.n_actions * self.n_agents
+        )
         if self.args.obs_last_action:
             self.input_shape += self.n_actions
         self.output_type = "q"
-        self.critics = [MLP(self.input_shape, self.args.hidden_dim, 1) for _ in range(self.n_agents)]
+        self.critics = [
+            MLP(self.input_shape, self.args.hidden_dim, 1) for _ in range(self.n_agents)
+        ]
 
     def forward(self, inputs, actions):
         inputs = th.cat((inputs, actions), dim=-1)
