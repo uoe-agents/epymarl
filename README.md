@@ -11,6 +11,8 @@ EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and inc
 See our blog post here: https://agents.inf.ed.ac.uk/blog/epymarl/
 
 ## Update as of *June 2024*!
+
+### Support for training in environments with individual rewards for all agents
 Previously PyMARL and EPyMARL only supported training of MARL algorithms in common-reward environments. To support environments which naturally provide individual rewards for agents (e.g. LBF and RWARE), we previously scalarised the rewards of all agents using a sum operation to obtain a single common reward that was then given to all agents. We are glad to announce that EPyMARL now supports training in general-sum reward environments (for all algorithms that are sound to train in general-sum reward settings)!
 
 - **Algorithms that support general-sum reward envs**: IA2C, IPPO, MAA2C, MAPPO, IQL, PAC
@@ -21,6 +23,9 @@ By default, EPyMARL runs experiments with common rewards (as done previously). T
 python3 src/main.py --config=mappo --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2" common_reward=False
 ```
 When using the `common_reward=True` setup in environments which naturally provide individual rewards, by default we scalarise the rewards into a common reward by summing up all rewards. This is now configurable and we support the mean operation as an alternative scalarisation. To use the mean scalarisation, set `reward_scalarisation="mean"`.
+
+### Plotting script
+We have added a simple plotting script under `plot_results.py` to load data from sacred logs and visualise them for executed experiments. The script supports plotting of any logged metric, can apply simple window-smoothing, aggregates results across multiple runs of the same algorithm, and can filter which results to plot based on algorithm and environment names.
 
 ## Update as of *15th July 2023*!
 We have released our _Pareto Actor-Critic_ algorithm, accepted in TMLR, as part of the E-PyMARL source code. 
