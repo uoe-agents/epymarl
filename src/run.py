@@ -1,23 +1,24 @@
 import datetime
 import os
+from os.path import dirname, abspath
 import pprint
+import shutil
 import time
 import threading
-import torch as th
 from types import SimpleNamespace as SN
-from utils.logging import Logger
-from utils.timehelper import time_left, time_str
-from os.path import dirname, abspath
 
-from learners import REGISTRY as le_REGISTRY
-from runners import REGISTRY as r_REGISTRY
+import torch as th
+
 from controllers import REGISTRY as mac_REGISTRY
 from components.episode_buffer import ReplayBuffer
 from components.transforms import OneHot
+from learners import REGISTRY as le_REGISTRY
+from runners import REGISTRY as r_REGISTRY
+from utils.logging import Logger
+from utils.timehelper import time_left, time_str
 
 
 def run(_run, _config, _log):
-
     # check args sanity
     _config = args_sanity_check(_config, _log)
 
@@ -38,7 +39,9 @@ def run(_run, _config, _log):
         map_name = _config["env_args"]["map_name"]
     except:
         map_name = _config["env_args"]["key"]
-    unique_token = f"{_config['name']}_seed{_config['seed']}_{map_name}_{datetime.datetime.now()}"
+    unique_token = (
+        f"{_config['name']}_seed{_config['seed']}_{map_name}_{datetime.datetime.now()}"
+    )
 
     args.unique_token = unique_token
     if args.use_tensorboard:
@@ -47,6 +50,11 @@ def run(_run, _config, _log):
         )
         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
         logger.setup_tb(tb_exp_direc)
+
+    if args.use_wandb:
+        logger.setup_wandb(
+            _config, args.wandb_team, args.wandb_project, args.wandb_mode
+        )
 
     # sacred is on by default
     logger.setup_sacred(_run)
@@ -71,7 +79,6 @@ def run(_run, _config, _log):
 
 
 def evaluate_sequential(args, runner):
-
     for _ in range(args.test_nepisode):
         runner.run(test_mode=True)
 
@@ -82,7 +89,6 @@ def evaluate_sequential(args, runner):
 
 
 def run_sequential(args, logger):
-
     # Init runner so we can get env info
     runner = r_REGISTRY[args.runner](args=args, logger=logger)
 
@@ -130,7 +136,6 @@ def run_sequential(args, logger):
         learner.cuda()
 
     if args.checkpoint_path != "":
-
         timesteps = []
         timestep_to_load = 0
 
@@ -180,7 +185,6 @@ def run_sequential(args, logger):
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
 
     while runner.t_env <= args.t_max:
-
         # Run for a whole episode at a time
         episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
@@ -200,7 +204,6 @@ def run_sequential(args, logger):
         # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
         if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
-
             logger.console_logger.info(
                 "t_env: {} / {}".format(runner.t_env, args.t_max)
             )
@@ -232,6 +235,16 @@ def run_sequential(args, logger):
             # use appropriate filenames to do critics, optimizer states
             learner.save_models(save_path)
 
+            if args.use_wandb and args.wandb_save_model:
+                wandb_save_dir = os.path.join(
+                    logger.wandb.dir, "models", args.unique_token, str(runner.t_env)
+                )
+                os.makedirs(wandb_save_dir, exist_ok=True)
+                for f in os.listdir(save_path):
+                    shutil.copyfile(
+                        os.path.join(save_path, f), os.path.join(wandb_save_dir, f)
+                    )
+
         episode += args.batch_size_run
 
         if (runner.t_env - last_log_T) >= args.log_interval:
@@ -244,7 +257,6 @@ def run_sequential(args, logger):
 
 
 def args_sanity_check(config, _log):
-
     # set CUDA flags
     # config["use_cuda"] = True # Use cuda whenever possible!
     if config["use_cuda"] and not th.cuda.is_available():
