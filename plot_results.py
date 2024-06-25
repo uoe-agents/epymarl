@@ -121,6 +121,13 @@ def load_results(path, metric):
 
 
 def filter_results(data, filter_by_algs, filter_by_envs):
+    """
+    Filter data to only contain results for algorithms and envs that contain any of the specified strings in their names.
+    :param data: dict with results
+    :param filter_by_algs: list of strings to filter algorithms by
+    :param filter_by_envs: list of strings to filter environments by
+    :return: filtered data
+    """
     filtered_data = data.copy()
     delete_keys = set()
     if filter_by_algs:
@@ -141,34 +148,43 @@ def filter_results(data, filter_by_algs, filter_by_envs):
 
 
 def aggregate_results(data):
+    """
+    Aggregate results with mean and std over runs of the same config
+    :param data: dict with results
+    :return: aggregated data as dict with key -> (config, steps, means, stds)
+    """
     agg_data = defaultdict(list)
     for key, results in data.items():
         config = results[0][0]
-        all_steps = [steps for _, steps, _ in results]
-        all_values = [values for _, _, values in results]
-        max_len = max([len(steps) for steps in all_steps])
+        all_steps = []
+        all_values = []
+        max_len = max([len(steps) for _, steps, _ in results])
 
-        filtered_steps = []
-        filtered_values = []
-        for steps, values in zip(all_steps, all_values):
-            if len(steps) < max_len:
-                warnings.warn(
-                    f"Length of steps ({len(steps)}) is less than max length ({max_len}) for run with key {key} --> skipping"
+        for _, steps, values in results:
+            if len(steps) != max_len:
+                # append np.nan to values to make sure they have the same length
+                steps = np.concatenate([steps, np.full(max_len - len(steps), np.nan)])
+                values = np.concatenate(
+                    [values, np.full(max_len - len(values), np.nan)]
                 )
-                continue
-            else:
-                filtered_steps.append(steps)
-                filtered_values.append(values)
+            all_steps.append(steps)
+            all_values.append(values)
 
-        agg_steps = np.stack(filtered_steps).mean(axis=0)
-        values = np.stack(filtered_values)
-        means = values.mean(axis=0)
-        stds = values.std(axis=0)
+        agg_steps = np.nanmean(np.stack(all_steps), axis=0)
+        values = np.stack(all_values)
+        means = np.nanmean(values, axis=0)
+        stds = np.nanstd(values, axis=0)
         agg_data[key] = (config, agg_steps, means, stds)
     return agg_data
 
 
 def smooth_data(data, window_size):
+    """
+    Apply window smoothing to data
+    :param data: dict with results
+    :param window_size: size of window for smoothing
+    :return: smoothed data as dict with key -> (config, smoothed_steps, smoothed_means, smoothed_stds)
+    """
     for key, results in data.items():
         config, steps, means, stds = results
         assert (
@@ -191,8 +207,14 @@ def smooth_data(data, window_size):
 
 
 def group_data_by_task(data):
+    """
+    To generate one plot per task, group data by task
+    :param data: dict with results as dict of key -> (config, steps, means, stds)
+    :return: grouped data as dict of (env_args, env_name, common_reward, reward_scalarisation) ->
+        dict with (alg_name, key) -> (config, steps, means, stds)
+    """
     grouped_data = defaultdict(dict)
-    for results in data.values():
+    for key, results in data.items():
         config, steps, means, stds = results
         alg_name = extract_alg_name_from_config(config)
         env_name = extract_env_name_from_config(config)
@@ -200,9 +222,77 @@ def group_data_by_task(data):
         common_reward = config["common_reward"]
         reward_scalarisation = config["reward_scalarisation"]
         grouped_data[(str(env_args), env_name, common_reward, reward_scalarisation)][
-            alg_name
-        ] = (steps, means, stds)
+            (alg_name, key)
+        ] = (config, steps, means, stds)
     return grouped_data
+
+
+def _get_unique_keys(dicts):
+    """
+    Get all keys from a list of dicts that do not have identical values across all dicts
+    :param dicts: list of dicts
+    :return: list of unique keys
+    """
+    # get all keys across configs
+    keys_to_check = set()
+    for config in dicts:
+        keys_to_check.update(config.keys())
+
+    unique_keys = []
+    for key in keys_to_check:
+        if key == "hypergroup":
+            # skip hypergroup key
+            continue
+        # add keys that are not in all dicts
+        if any(key not in d for d in dicts):
+            unique_keys.append(key)
+        # skip keys with dict/ iterable values
+        if any(isinstance(d[key], (dict, list)) for d in dicts):
+            continue
+        # check if value of key is the same for all configs
+        if len(set(d[key] for d in dicts)) > 1:
+            unique_keys.append(key)
+    return unique_keys
+
+
+def get_data_with_unique_names(data):
+    """
+    Expand alg names for plot legend with all hyperparameters from config that are not identical
+        across all configs of that task
+    :param data: dict with results as dict with (alg_name, key) -> (config, steps, means, stds)
+    :return: dict with (expanded_alg_name) -> (config, steps, means, stds)
+    """
+    configs_by_alg_name = defaultdict(list)
+    for (alg_name, _), (config, _, _, _) in data.items():
+        configs_by_alg_name[alg_name].append(config)
+
+    unique_keys_by_alg_name = {
+        alg_name: _get_unique_keys(configs)
+        for alg_name, configs in configs_by_alg_name.items()
+    }
+
+    expanded_data = {}
+    for (alg_name, _), (config, steps, means, stds) in data.items():
+        expanded_alg_name = alg_name
+        unique_keys_for_alg = unique_keys_by_alg_name[alg_name]
+        for key in unique_keys_for_alg:
+            if key not in config:
+                continue
+            value = config[key]
+            if isinstance(value, float):
+                value = round(value, 4)
+            expanded_alg_name += f"_{key}={config[key]}"
+        expanded_data[expanded_alg_name] = (steps, means, stds)
+    return expanded_data
+
+
+def _sorted_alg_names_by_mean(data):
+    """
+    Sort alg names by mean value of metric
+    :param data: dict with alg names -> (steps, means, stds)
+    :return: list of sorted alg names
+    """
+    return sorted(data, key=lambda x: np.mean(data[x][1]), reverse=True)
 
 
 def plot_results(grouped_data, metric, save_dir, y_min, y_max, log_scale):
@@ -212,20 +302,27 @@ def plot_results(grouped_data, metric, save_dir, y_min, y_max, log_scale):
 
     for (_, env, cr, rs), data in grouped_data.items():
         plt.figure()
-        for alg_name, results in data.items():
-            steps, means, stds = results
+        alg_names_by_performance = _sorted_alg_names_by_mean(data)
+        for alg_name in alg_names_by_performance:
+            steps, means, stds = data[alg_name]
             plt.plot(steps, means, label=alg_name)
             plt.fill_between(steps, means - stds, means + stds, alpha=ALPHA)
         plt.title(f"Common Reward: {cr} (scalarisation: {rs})")
         plt.xlabel("Timesteps")
         plt.ylabel(metric)
-        plt.legend()
+
+        if len(data) > 6:
+            # place legend below plot if there are many algos
+            plt.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=3)
+        else:
+            plt.legend()
+
         if log_scale:
             plt.yscale("log")
         if y_min is not None or y_max is not None:
             plt.ylim(y_min, y_max)
         if save_dir is not None:
-            plt.savefig(save_dir / f"{env}_{metric}_{cr}.pdf")
+            plt.savefig(save_dir / f"{env}_{metric}_{cr}.pdf", bbox_inches="tight")
 
 
 def main():
@@ -236,8 +333,11 @@ def main():
     if args.smoothing_window is not None:
         data = smooth_data(data, args.smoothing_window)
     grouped_data = group_data_by_task(data)
+    grouped_data_with_unique_names = {
+        key: get_data_with_unique_names(data) for key, data in grouped_data.items()
+    }
     plot_results(
-        grouped_data,
+        grouped_data_with_unique_names,
         args.metric,
         Path(args.save_dir),
         args.y_min,
