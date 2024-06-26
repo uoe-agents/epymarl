@@ -246,6 +246,7 @@ def _get_unique_keys(dicts):
         # add keys that are not in all dicts
         if any(key not in d for d in dicts):
             unique_keys.append(key)
+            continue
         # skip keys with dict/ iterable values
         if any(isinstance(d[key], (dict, list)) for d in dicts):
             continue
