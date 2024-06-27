@@ -72,6 +72,11 @@ class Logger:
         self.console_logger.info(f"{self.wandb.id}")
         self.console_logger.info("*******************")
 
+        # accumulate data at same timestep and only log in one batch once
+        # all data has been gathered
+        self.wandb_current_t = -1
+        self.wandb_current_data = {}
+
     def setup_sacred(self, sacred_run_dict):
         self._run_obj = sacred_run_dict
         self.sacred_info = sacred_run_dict.info
@@ -84,12 +89,14 @@ class Logger:
             self.tb_logger(key, value, t)
 
         if self.use_wandb:
-            self.wandb.log(
-                {
-                    key: value,
-                    f"{key}_T": t,
-                }
-            )
+            if self.wandb_current_t != t and self.wandb_current_data:
+                # self.console_logger.info(
+                #     f"Logging to WANDB: {self.wandb_current_data} at t={self.wandb_current_t}"
+                # )
+                self.wandb.log(self.wandb_current_data, step=self.wandb_current_t)
+                self.wandb_current_data = {}
+            self.wandb_current_t = t
+            self.wandb_current_data[key] = value
 
         if self.use_sacred and to_sacred:
             if key in self.sacred_info:
