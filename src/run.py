@@ -1,17 +1,19 @@
 import datetime
 import os
+from os.path import dirname, abspath
 import pprint
+import shutil
 import time
 import threading
-import torch as th
 from types import SimpleNamespace as SN
-from os.path import dirname, abspath
 
-from learners import REGISTRY as le_REGISTRY
-from runners import REGISTRY as r_REGISTRY
+import torch as th
+
 from controllers import REGISTRY as mac_REGISTRY
 from components.episode_buffer import ReplayBuffer
 from components.transforms import OneHot
+from learners import REGISTRY as le_REGISTRY
+from runners import REGISTRY as r_REGISTRY
 from utils.general_reward_support import test_alg_config_supports_reward
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
@@ -52,6 +54,11 @@ def run(_run, _config, _log):
         )
         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
         logger.setup_tb(tb_exp_direc)
+
+    if args.use_wandb:
+        logger.setup_wandb(
+            _config, args.wandb_team, args.wandb_project, args.wandb_mode
+        )
 
     # sacred is on by default
     logger.setup_sacred(_run)
@@ -235,6 +242,16 @@ def run_sequential(args, logger):
             # learner should handle saving/loading -- delegate actor save/load to mac,
             # use appropriate filenames to do critics, optimizer states
             learner.save_models(save_path)
+
+            if args.use_wandb and args.wandb_save_model:
+                wandb_save_dir = os.path.join(
+                    logger.wandb.dir, "models", args.unique_token, str(runner.t_env)
+                )
+                os.makedirs(wandb_save_dir, exist_ok=True)
+                for f in os.listdir(save_path):
+                    shutil.copyfile(
+                        os.path.join(save_path, f), os.path.join(wandb_save_dir, f)
+                    )
 
         episode += args.batch_size_run
 

@@ -1,8 +1,10 @@
-from envs import REGISTRY as env_REGISTRY
 from functools import partial
-from components.episode_buffer import EpisodeBatch
 from multiprocessing import Pipe, Process
+
 import numpy as np
+
+from components.episode_buffer import EpisodeBatch
+from envs import REGISTRY as env_REGISTRY
 
 
 # Based (very) heavily on SubprocVecEnv from OpenAI Baselines

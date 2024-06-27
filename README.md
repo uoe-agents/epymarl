@@ -2,6 +2,7 @@
 
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
 - **New!** Support for training in environments with individual rewards for all agents (for all algorithms that support such settings)
+- **New!** Support for logging to [weights and biases (W&B)](https://wandb.ai/)
 - Additional algorithms (IA2C, IPPO, MADDPG, MAA2C and MAPPO)
 - Support for [Gym](https://github.com/openai/gym) environments (on top of the existing SMAC support)
 - Option for no-parameter sharing between agents (original PyMARL only allowed for parameter sharing)
@@ -26,6 +27,25 @@ When using the `common_reward=True` setup in environments which naturally provid
 
 ### Plotting script
 We have added a simple plotting script under `plot_results.py` to load data from sacred logs and visualise them for executed experiments. The script supports plotting of any logged metric, can apply simple window-smoothing, aggregates results across multiple runs of the same algorithm, and can filter which results to plot based on algorithm and environment names.
+
+If multiple configs of the same algorithm exist within the loaded data and you only want to plot the best config per algorithm, then add the `--best_per_alg` argument! If this argument is not set, the script will visualise all configs of each (filtered) algorithm and show the values of the hyperparameter config that differ across all present configs in the legend.
+
+### Weights and Biases (W&B) Logging
+We now support logging to W&B! To log data to W&B, you need to install the library with `pip install wandb` and setup W&B (see their [documentation](https://docs.wandb.ai/quickstart)). To tell EPyMARL to log data to W&B, you then need to specify the following config parameters:
+```yaml
+use_wandb: True # Log results to W&B
+wandb_team: null # W&B team name
+wandb_project: null # W&B project name
+```
+to specify the team and project you wish to log to within your account, and set `use_wandb=True`. By default, we log all W&B runs in "offline" mode, i.e. the data will only be stored locally and can be uploaded to your W&B account via `wandb sync ...`. To directly log runs online, please specify `wandb_mode="online"` within the config.
+
+We also support logging all stored models directly to W&B so you can download and inspect these from the W&B online dashboard. To do so, use the following config parameters:
+```yaml
+wandb_save_model: True # Save models to W&B (only done if use_wandb is True and save_model is True)
+save_model: True # Save the models to disk
+save_model_interval: 50000
+```
+Note that models are only saved in general if `save_model=True` and to further log them to W&B you need to specify `use_wandb`, `wandb_team`, `wandb_project`, and `wandb_save_model=True`.
 
 ## Update as of *15th July 2023*!
 We have released our _Pareto Actor-Critic_ algorithm, accepted in TMLR, as part of the E-PyMARL source code. 

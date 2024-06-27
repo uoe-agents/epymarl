@@ -1,7 +1,9 @@
-from envs import REGISTRY as env_REGISTRY
 from functools import partial
-from components.episode_buffer import EpisodeBatch
+
 import numpy as np
+
+from components.episode_buffer import EpisodeBatch
+from envs import REGISTRY as env_REGISTRY
 
 
 class EpisodeRunner:

@@ -20,6 +20,11 @@ buffer_cpu_only: True # If true we won't keep all of the replay buffer in vram
 
 # --- Logging options ---
 use_tensorboard: False # Log results to tensorboard
+use_wandb: False # Log results to W&B
+wandb_team: null # W&B team name
+wandb_project: null # W&B project name
+wandb_mode: "offline" # W&B mode (online/offline)
+wandb_save_model: False # Save models to W&B (only done if use_wandb is True and save_model is True)
 save_model: False # Save the models to disk
 save_model_interval: 50000 # Save models after this many timesteps
 checkpoint_path: "" # Load a checkpoint from this path
