@@ -14,6 +14,7 @@ from components.episode_buffer import ReplayBuffer
 from components.transforms import OneHot
 from learners import REGISTRY as le_REGISTRY
 from runners import REGISTRY as r_REGISTRY
+from utils.general_reward_support import test_alg_config_supports_reward
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
 
@@ -24,6 +25,9 @@ def run(_run, _config, _log):
 
     args = SN(**_config)
     args.device = "cuda" if args.use_cuda else "cpu"
+    assert test_alg_config_supports_reward(
+        args
+    ), "The specified algorithm does not support the general reward setup. Please choose a different algorithm or set `common_reward=True`."
 
     # setup loggers
     logger = Logger(_log)
@@ -108,9 +112,13 @@ def run_sequential(args, logger):
             "group": "agents",
             "dtype": th.int,
         },
-        "reward": {"vshape": (1,)},
         "terminated": {"vshape": (1,), "dtype": th.uint8},
     }
+    # For individual rewards in gymmai reward is of shape (1, n_agents)
+    if args.common_reward:
+        scheme["reward"] = {"vshape": (1,)}
+    else:
+        scheme["reward"] = {"vshape": (args.n_agents,)}
     groups = {"agents": args.n_agents}
     preprocess = {"actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])}
 

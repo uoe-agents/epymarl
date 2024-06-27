@@ -1,12 +1,13 @@
 # code heavily adapted from https://github.com/oxwhirl/facmac/
 import copy
-from components.episode_buffer import EpisodeBatch
-from modules.critics.maddpg import MADDPGCritic
+
 import torch as th
-from torch.optim import RMSprop, Adam
+from torch.optim import Adam
+
+from components.episode_buffer import EpisodeBatch
+from components.standarize_stream import RunningMeanStd
 from controllers.maddpg_controller import gumbel_softmax
 from modules.critics import REGISTRY as critic_registry
-from components.standarize_stream import RunningMeanStd
 
 
 class MADDPGLearner:
@@ -35,14 +36,14 @@ class MADDPGLearner:
         if self.args.standardise_returns:
             self.ret_ms = RunningMeanStd(shape=(self.n_agents,), device=device)
         if self.args.standardise_rewards:
-            self.rew_ms = RunningMeanStd(shape=(1,), device=device)
+            rew_shape = (1,) if self.args.common_reward else (self.n_agents,)
+            self.rew_ms = RunningMeanStd(shape=rew_shape, device=device)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]
         actions = batch["actions_onehot"]
         terminated = batch["terminated"][:, :-1].float()
-        rewards = rewards.unsqueeze(2).expand(-1, -1, self.n_agents, -1)
         terminated = terminated.unsqueeze(2).expand(-1, -1, self.n_agents, -1)
         mask = 1 - terminated
         batch_size = batch.batch_size
@@ -51,9 +52,21 @@ class MADDPGLearner:
             self.rew_ms.update(rewards)
             rewards = (rewards - self.rew_ms.mean) / th.sqrt(self.rew_ms.var)
 
+        if self.args.common_reward:
+            assert (
+                rewards.size(2) == 1
+            ), "Expected singular agent dimension for common rewards"
+            # reshape rewards to be of shape (batch_size, episode_length, n_agents, 1)
+            rewards = rewards.expand(-1, -1, self.n_agents).unsqueeze(-1)
+        else:
+            # reshape rewards to be of shape (batch_size, episode_length, n_agents, 1)
+            rewards = rewards.unsqueeze(-1)
+
         # Train the critic
         inputs = self._build_inputs(batch)
-        actions = actions.view(batch_size, -1, 1, self.n_agents * self.n_actions).expand(-1, -1, self.n_agents, -1)
+        actions = actions.view(
+            batch_size, -1, 1, self.n_agents * self.n_actions
+        ).expand(-1, -1, self.n_agents, -1)
         q_taken = self.critic(inputs[:, :-1], actions[:, :-1].detach())
         q_taken = q_taken.view(batch_size, -1, 1)
 
@@ -65,38 +78,49 @@ class MADDPGLearner:
             target_actions.append(agent_target_outs)
         target_actions = th.stack(target_actions, dim=1)  # Concat over time
 
-        target_actions = target_actions.view(batch_size, -1, 1, self.n_agents * self.n_actions).expand(-1, -1, self.n_agents, -1)
+        target_actions = target_actions.view(
+            batch_size, -1, 1, self.n_agents * self.n_actions
+        ).expand(-1, -1, self.n_agents, -1)
         target_vals = self.target_critic(inputs[:, 1:], target_actions.detach())
         target_vals = target_vals.view(batch_size, -1, 1)
 
         if self.args.standardise_returns:
             target_vals = target_vals * th.sqrt(self.ret_ms.var) + self.ret_ms.mean
 
-        targets = rewards.reshape(-1, 1) + self.args.gamma * (1 - terminated.reshape(-1, 1)) * target_vals.reshape(-1, 1).detach()
+        targets = (
+            rewards.reshape(-1, 1)
+            + self.args.gamma
+            * (1 - terminated.reshape(-1, 1))
+            * target_vals.reshape(-1, 1).detach()
+        )
 
         if self.args.standardise_returns:
             self.ret_ms.update(targets)
             targets = (targets - self.ret_ms.mean) / th.sqrt(self.ret_ms.var)
 
-        td_error = (q_taken.view(-1, 1) - targets.detach())
+        td_error = q_taken.view(-1, 1) - targets.detach()
         masked_td_error = td_error * mask.reshape(-1, 1)
-        loss = (masked_td_error ** 2).mean()
+        loss = (masked_td_error**2).mean()
 
         self.critic_optimiser.zero_grad()
         loss.backward()
-        critic_grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
+        critic_grad_norm = th.nn.utils.clip_grad_norm_(
+            self.critic_params, self.args.grad_norm_clip
+        )
         self.critic_optimiser.step()
 
         # Train the actor
         self.mac.init_hidden(batch_size)
         pis = []
         actions = []
-        for t in range(batch.max_seq_length-1):
+        for t in range(batch.max_seq_length - 1):
             pi = self.mac.forward(batch, t=t).view(batch_size, 1, self.n_agents, -1)
             actions.append(gumbel_softmax(pi, hard=True))
             pis.append(pi)
         actions = th.cat(actions, dim=1)
-        actions = actions.view(batch_size, -1, 1, self.n_agents * self.n_actions).expand(-1, -1, self.n_agents, -1)
+        actions = actions.view(
+            batch_size, -1, 1, self.n_agents * self.n_actions
+        ).expand(-1, -1, self.n_agents, -1)
 
         new_actions = []
         for i in range(self.n_agents):
@@ -112,22 +136,29 @@ class MADDPGLearner:
         new_actions = th.cat(new_actions, dim=2)
 
         pis = th.cat(pis, dim=1)
-        pis[pis==-1e10] = 0
+        pis[pis == -1e10] = 0
         pis = pis.reshape(-1, 1)
         q = self.critic(inputs[:, :-1], new_actions)
         q = q.reshape(-1, 1)
         mask = mask.reshape(-1, 1)
 
         # Compute the actor loss
-        pg_loss = -(q * mask).mean() + self.args.reg * (pis ** 2).mean()
+        pg_loss = -(q * mask).mean() + self.args.reg * (pis**2).mean()
 
         # Optimise agents
         self.agent_optimiser.zero_grad()
         pg_loss.backward()
-        agent_grad_norm = th.nn.utils.clip_grad_norm_(self.agent_params, self.args.grad_norm_clip)
+        agent_grad_norm = th.nn.utils.clip_grad_norm_(
+            self.agent_params, self.args.grad_norm_clip
+        )
         self.agent_optimiser.step()
 
-        if self.args.target_update_interval_or_tau > 1 and (episode_num - self.last_target_update_episode) / self.args.target_update_interval_or_tau >= 1.0:
+        if (
+            self.args.target_update_interval_or_tau > 1
+            and (episode_num - self.last_target_update_episode)
+            / self.args.target_update_interval_or_tau
+            >= 1.0
+        ):
             self._update_targets_hard()
             self.last_target_update_episode = episode_num
         elif self.args.target_update_interval_or_tau <= 1.0:
@@ -138,11 +169,16 @@ class MADDPGLearner:
             self.logger.log_stat("critic_grad_norm", critic_grad_norm.item(), t_env)
             self.logger.log_stat("agent_grad_norm", agent_grad_norm.item(), t_env)
             mask_elems = mask.sum().item()
-            self.logger.log_stat("td_error_abs", masked_td_error.abs().sum().item() / mask_elems, t_env)
-            self.logger.log_stat("q_taken_mean", (q_taken).sum().item() / mask_elems, t_env)
-            self.logger.log_stat("target_mean", targets.sum().item() / mask_elems, t_env)
+            self.logger.log_stat(
+                "td_error_abs", masked_td_error.abs().sum().item() / mask_elems, t_env
+            )
+            self.logger.log_stat(
+                "q_taken_mean", (q_taken).sum().item() / mask_elems, t_env
+            )
+            self.logger.log_stat(
+                "target_mean", targets.sum().item() / mask_elems, t_env
+            )
             self.logger.log_stat("pg_loss", pg_loss.item(), t_env)
-            self.logger.log_stat("agent_grad_norm", agent_grad_norm, t_env)
             self.log_stats_t = t_env
 
     def _build_inputs(self, batch, t=None):
@@ -151,7 +187,9 @@ class MADDPGLearner:
         ts = slice(None) if t is None else slice(t, t + 1)
 
         inputs = []
-        inputs.append(batch["state"][:, ts].unsqueeze(2).expand(-1, -1, self.n_agents, -1))
+        inputs.append(
+            batch["state"][:, ts].unsqueeze(2).expand(-1, -1, self.n_agents, -1)
+        )
         if self.args.obs_individual_obs:
             inputs.append(batch["obs"][:, ts])
 
@@ -162,12 +200,22 @@ class MADDPGLearner:
             elif isinstance(t, int):
                 inputs.append(batch["actions_onehot"][:, slice(t - 1, t)])
             else:
-                last_actions = th.cat([th.zeros_like(batch["actions_onehot"][:, 0:1]), batch["actions_onehot"][:, :-1]],
-                                      dim=1)
+                last_actions = th.cat(
+                    [
+                        th.zeros_like(batch["actions_onehot"][:, 0:1]),
+                        batch["actions_onehot"][:, :-1],
+                    ],
+                    dim=1,
+                )
                 # last_actions = last_actions.view(bs, max_t, 1, -1).repeat(1, 1, self.n_agents, 1)
                 inputs.append(last_actions)
         if self.args.obs_agent_id:
-            inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).unsqueeze(0).expand(bs, max_t, -1, -1))
+            inputs.append(
+                th.eye(self.n_agents, device=batch.device)
+                .unsqueeze(0)
+                .unsqueeze(0)
+                .expand(bs, max_t, -1, -1)
+            )
 
         inputs = th.cat(inputs, dim=-1)
         return inputs
@@ -177,10 +225,14 @@ class MADDPGLearner:
         self.target_critic.load_state_dict(self.critic.state_dict())
 
     def _update_targets_soft(self, tau):
-        for target_param, param in zip(self.target_mac.parameters(), self.mac.parameters()):
+        for target_param, param in zip(
+            self.target_mac.parameters(), self.mac.parameters()
+        ):
             target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
-        for target_param, param in zip(self.target_critic.parameters(), self.critic.parameters()):
+        for target_param, param in zip(
+            self.target_critic.parameters(), self.critic.parameters()
+        ):
             target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
     def cuda(self):
@@ -200,4 +252,8 @@ class MADDPGLearner:
         # Not quite right but I don't want to save target networks
         self.target_mac.load_models(path)
         self.agent_optimiser.load_state_dict(
-            th.load("{}/agent_opt.th".format(path), map_location=lambda storage, loc: storage))
+            th.load(
+                "{}/agent_opt.th".format(path),
+                map_location=lambda storage, loc: storage,
+            )
+        )

@@ -2,7 +2,7 @@
 
 import torch as th
 import torch.nn as nn
-import torch.nn.functional as F
+
 from modules.critics.mlp import MLP
 
 
@@ -18,7 +18,9 @@ class CentralVCriticNS(nn.Module):
         self.output_type = "v"
 
         # Set up network layers
-        self.critics = [MLP(input_shape, args.hidden_dim, 1) for _ in range(self.n_agents)]
+        self.critics = [
+            MLP(input_shape, args.hidden_dim, 1) for _ in range(self.n_agents)
+        ]
 
     def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
@@ -32,7 +34,7 @@ class CentralVCriticNS(nn.Module):
     def _build_inputs(self, batch, t=None):
         bs = batch.batch_size
         max_t = batch.max_seq_length if t is None else 1
-        ts = slice(None) if t is None else slice(t, t+1)
+        ts = slice(None) if t is None else slice(t, t + 1)
         inputs = []
         # state
         inputs.append(batch["state"][:, ts])
@@ -44,11 +46,23 @@ class CentralVCriticNS(nn.Module):
         if self.args.obs_last_action:
             # last actions
             if t == 0:
-                inputs.append(th.zeros_like(batch["actions_onehot"][:, 0:1]).view(bs, max_t, 1, -1))
+                inputs.append(
+                    th.zeros_like(batch["actions_onehot"][:, 0:1]).view(
+                        bs, max_t, 1, -1
+                    )
+                )
             elif isinstance(t, int):
-                inputs.append(batch["actions_onehot"][:, slice(t-1, t)].view(bs, max_t, 1, -1))
+                inputs.append(
+                    batch["actions_onehot"][:, slice(t - 1, t)].view(bs, max_t, 1, -1)
+                )
             else:
-                last_actions = th.cat([th.zeros_like(batch["actions_onehot"][:, 0:1]), batch["actions_onehot"][:, :-1]], dim=1)
+                last_actions = th.cat(
+                    [
+                        th.zeros_like(batch["actions_onehot"][:, 0:1]),
+                        batch["actions_onehot"][:, :-1],
+                    ],
+                    dim=1,
+                )
                 last_actions = last_actions.view(bs, max_t, 1, -1)
                 inputs.append(last_actions)
 

@@ -23,7 +23,8 @@ class ParallelRunner:
         env_args = [self.args.env_args.copy() for _ in range(self.batch_size)]
         for i in range(self.batch_size):
             env_args[i]["seed"] += i
-
+            env_args[i]["common_reward"] = self.args.common_reward
+            env_args[i]["reward_scalarisation"] = self.args.reward_scalarisation
         self.ps = [
             Process(
                 target=env_worker,
@@ -100,7 +101,12 @@ class ParallelRunner:
         self.reset()
 
         all_terminated = False
-        episode_returns = [0 for _ in range(self.batch_size)]
+        if self.args.common_reward:
+            episode_returns = [0 for _ in range(self.batch_size)]
+        else:
+            episode_returns = [
+                np.zeros(self.args.n_agents) for _ in range(self.batch_size)
+            ]
         episode_lengths = [0 for _ in range(self.batch_size)]
         self.mac.init_hidden(batch_size=self.batch_size)
         terminated = [False for _ in range(self.batch_size)]
@@ -238,8 +244,28 @@ class ParallelRunner:
         return self.batch
 
     def _log(self, returns, stats, prefix):
-        self.logger.log_stat(prefix + "return_mean", np.mean(returns), self.t_env)
-        self.logger.log_stat(prefix + "return_std", np.std(returns), self.t_env)
+        if self.args.common_reward:
+            self.logger.log_stat(prefix + "return_mean", np.mean(returns), self.t_env)
+            self.logger.log_stat(prefix + "return_std", np.std(returns), self.t_env)
+        else:
+            for i in range(self.args.n_agents):
+                self.logger.log_stat(
+                    prefix + f"agent_{i}_return_mean",
+                    np.array(returns)[:, i].mean(),
+                    self.t_env,
+                )
+                self.logger.log_stat(
+                    prefix + f"agent_{i}_return_std",
+                    np.array(returns)[:, i].std(),
+                    self.t_env,
+                )
+            total_returns = np.array(returns).sum(axis=-1)
+            self.logger.log_stat(
+                prefix + "total_return_mean", total_returns.mean(), self.t_env
+            )
+            self.logger.log_stat(
+                prefix + "total_return_std", total_returns.std(), self.t_env
+            )
         returns.clear()
 
         for k, v in stats.items():

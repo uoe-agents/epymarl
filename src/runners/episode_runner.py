@@ -13,7 +13,11 @@ class EpisodeRunner:
         self.batch_size = self.args.batch_size_run
         assert self.batch_size == 1
 
-        self.env = env_REGISTRY[self.args.env](**self.args.env_args)
+        self.env = env_REGISTRY[self.args.env](
+            **self.args.env_args,
+            common_reward=self.args.common_reward,
+            reward_scalarisation=self.args.reward_scalarisation,
+        )
         self.episode_limit = self.env.episode_limit
         self.t = 0
 
@@ -57,7 +61,10 @@ class EpisodeRunner:
         self.reset()
 
         terminated = False
-        episode_return = 0
+        if self.args.common_reward:
+            episode_return = 0
+        else:
+            episode_return = np.zeros(self.args.n_agents)
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
@@ -82,9 +89,12 @@ class EpisodeRunner:
 
             post_transition_data = {
                 "actions": actions,
-                "reward": [(reward,)],
                 "terminated": [(terminated != env_info.get("episode_limit", False),)],
             }
+            if self.args.common_reward:
+                post_transition_data["reward"] = [(reward,)]
+            else:
+                post_transition_data["reward"] = [tuple(reward)]
 
             self.batch.update(post_transition_data, ts=self.t)
 
@@ -135,8 +145,28 @@ class EpisodeRunner:
         return self.batch
 
     def _log(self, returns, stats, prefix):
-        self.logger.log_stat(prefix + "return_mean", np.mean(returns), self.t_env)
-        self.logger.log_stat(prefix + "return_std", np.std(returns), self.t_env)
+        if self.args.common_reward:
+            self.logger.log_stat(prefix + "return_mean", np.mean(returns), self.t_env)
+            self.logger.log_stat(prefix + "return_std", np.std(returns), self.t_env)
+        else:
+            for i in range(self.args.n_agents):
+                self.logger.log_stat(
+                    prefix + f"agent_{i}_return_mean",
+                    np.array(returns)[:, i].mean(),
+                    self.t_env,
+                )
+                self.logger.log_stat(
+                    prefix + f"agent_{i}_return_std",
+                    np.array(returns)[:, i].std(),
+                    self.t_env,
+                )
+            total_returns = np.array(returns).sum(axis=-1)
+            self.logger.log_stat(
+                prefix + "total_return_mean", total_returns.mean(), self.t_env
+            )
+            self.logger.log_stat(
+                prefix + "total_return_std", total_returns.std(), self.t_env
+            )
         returns.clear()
 
         for k, v in stats.items():

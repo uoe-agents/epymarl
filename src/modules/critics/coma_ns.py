@@ -1,6 +1,6 @@
 import torch as th
 import torch.nn as nn
-import torch.nn.functional as F
+
 from modules.critics.mlp import MLP
 
 
@@ -16,7 +16,10 @@ class COMACriticNS(nn.Module):
         self.output_type = "q"
 
         # Set up network layers
-        self.critics = [MLP(input_shape, args.hidden_dim, self.n_actions) for _ in range(self.n_agents)]
+        self.critics = [
+            MLP(input_shape, args.hidden_dim, self.n_actions)
+            for _ in range(self.n_agents)
+        ]
 
     def forward(self, batch, t=None):
         inputs = self._build_inputs(batch, t=t)
@@ -29,7 +32,7 @@ class COMACriticNS(nn.Module):
     def _build_inputs(self, batch, t=None):
         bs = batch.batch_size
         max_t = batch.max_seq_length if t is None else 1
-        ts = slice(None) if t is None else slice(t, t+1)
+        ts = slice(None) if t is None else slice(t, t + 1)
         inputs = []
         # state
         inputs.append(batch["state"][:, ts].unsqueeze(2).repeat(1, 1, self.n_agents, 1))
@@ -39,23 +42,47 @@ class COMACriticNS(nn.Module):
             inputs.append(batch["obs"][:, ts])
 
         # actions (masked out by agent)
-        actions = batch["actions_onehot"][:, ts].view(bs, max_t, 1, -1).repeat(1, 1, self.n_agents, 1)
-        agent_mask = (1 - th.eye(self.n_agents, device=batch.device))
-        agent_mask = agent_mask.view(-1, 1).repeat(1, self.n_actions).view(self.n_agents, -1)
+        actions = (
+            batch["actions_onehot"][:, ts]
+            .view(bs, max_t, 1, -1)
+            .repeat(1, 1, self.n_agents, 1)
+        )
+        agent_mask = 1 - th.eye(self.n_agents, device=batch.device)
+        agent_mask = (
+            agent_mask.view(-1, 1).repeat(1, self.n_actions).view(self.n_agents, -1)
+        )
         inputs.append(actions * agent_mask.unsqueeze(0).unsqueeze(0))
 
         # last actions
         if self.args.obs_last_action:
             if t == 0:
-                inputs.append(th.zeros_like(batch["actions_onehot"][:, 0:1]).view(bs, max_t, 1, -1).repeat(1, 1, self.n_agents, 1))
+                inputs.append(
+                    th.zeros_like(batch["actions_onehot"][:, 0:1])
+                    .view(bs, max_t, 1, -1)
+                    .repeat(1, 1, self.n_agents, 1)
+                )
             elif isinstance(t, int):
-                inputs.append(batch["actions_onehot"][:, slice(t-1, t)].view(bs, max_t, 1, -1).repeat(1, 1, self.n_agents, 1))
+                inputs.append(
+                    batch["actions_onehot"][:, slice(t - 1, t)]
+                    .view(bs, max_t, 1, -1)
+                    .repeat(1, 1, self.n_agents, 1)
+                )
             else:
-                last_actions = th.cat([th.zeros_like(batch["actions_onehot"][:, 0:1]), batch["actions_onehot"][:, :-1]], dim=1)
-                last_actions = last_actions.view(bs, max_t, 1, -1).repeat(1, 1, self.n_agents, 1)
+                last_actions = th.cat(
+                    [
+                        th.zeros_like(batch["actions_onehot"][:, 0:1]),
+                        batch["actions_onehot"][:, :-1],
+                    ],
+                    dim=1,
+                )
+                last_actions = last_actions.view(bs, max_t, 1, -1).repeat(
+                    1, 1, self.n_agents, 1
+                )
                 inputs.append(last_actions)
 
-        inputs = th.cat([x.reshape(bs, max_t, self.n_agents, -1) for x in inputs], dim=-1)
+        inputs = th.cat(
+            [x.reshape(bs, max_t, self.n_agents, -1) for x in inputs], dim=-1
+        )
         return inputs
 
     def _get_input_shape(self, scheme):

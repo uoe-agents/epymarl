@@ -1,9 +1,9 @@
 absl-py
 attrs
+click
 gym==0.21.0
 idna==2.7
 imageio
-lbforaging
 matplotlib
 mpyq==0.2.5
 numpy
@@ -12,17 +12,14 @@ Pillow
 pluggy==0.7.1
 portpicker==1.2.0
 probscale
-protobuf==3.6.1
+protobuf
 py==1.6.0
 pygame
 pyparsing==2.2.2
-pysc2==3.0.0
 pytest==4.3.1
 python-dateutil==2.7.3
 PyYAML==5.3.1
 requests==2.19.1
-rware
-s2clientprotocol==4.10.1.75800.0
 sacred
 scipy
 six==1.11.0
@@ -36,4 +33,3 @@ urllib3==1.23
 websocket-client==0.53.0
 whichcraft==0.5.2
 wrapt==1.10.11
-git+https://github.com/oxwhirl/smac.git
