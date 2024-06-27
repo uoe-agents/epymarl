@@ -1,6 +1,6 @@
 import torch as th
 import torch.nn as nn
-import torch.nn.functional as F
+
 from modules.critics.mlp import MLP
 
 
@@ -16,7 +16,9 @@ class ACCriticNS(nn.Module):
         self.output_type = "v"
 
         # Set up network layers
-        self.critics = [MLP(input_shape, args.hidden_dim, 1) for _ in range(self.n_agents)]
+        self.critics = [
+            MLP(input_shape, args.hidden_dim, 1) for _ in range(self.n_agents)
+        ]
 
     def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)
@@ -30,7 +32,7 @@ class ACCriticNS(nn.Module):
     def _build_inputs(self, batch, t=None):
         bs = batch.batch_size
         max_t = batch.max_seq_length if t is None else 1
-        ts = slice(None) if t is None else slice(t, t+1)
+        ts = slice(None) if t is None else slice(t, t + 1)
         inputs = batch["obs"][:, ts]
         return inputs, bs, max_t
 
