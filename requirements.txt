@@ -1,7 +1,7 @@
 absl-py
 attrs
 click
-gym==0.21.0
+gymnasium
 idna==2.7
 imageio
 matplotlib

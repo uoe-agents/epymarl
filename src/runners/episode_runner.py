@@ -82,7 +82,8 @@ class EpisodeRunner:
                 self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode
             )
 
-            reward, terminated, env_info = self.env.step(actions[0])
+            _, reward, terminated, truncated, env_info = self.env.step(actions[0])
+            terminated = terminated or truncated
             if test_mode and self.args.render:
                 self.env.render()
             episode_return += reward

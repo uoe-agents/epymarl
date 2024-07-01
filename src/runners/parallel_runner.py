@@ -284,7 +284,8 @@ def env_worker(remote, env_fn):
         if cmd == "step":
             actions = data
             # Take a step in the environment
-            reward, terminated, env_info = env.step(actions)
+            _, reward, terminated, truncated, env_info = env.step(actions)
+            terminated = terminated or truncated
             # Return the observations, avail_actions and state to make the next action
             state = env.get_state()
             avail_actions = env.get_avail_actions()

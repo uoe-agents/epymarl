@@ -1,64 +1,68 @@
-class MultiAgentEnv(object):
+from .multiagentenv import MultiAgentEnv
+
+
+class SMACWrapper(MultiAgentEnv):
+    def __init__(self, env):
+        self.env = env
+
     def step(self, actions):
         """Returns obss, reward, terminated, truncated, info"""
-        raise NotImplementedError
+        rews, terminated, info = self.env.step(actions)
+        obss = self.get_obs()
+        truncated = False
+        return obss, rews, terminated, truncated, info
 
     def get_obs(self):
         """Returns all agent observations in a list"""
-        raise NotImplementedError
+        return self.env.get_obs()
 
     def get_obs_agent(self, agent_id):
         """Returns observation for agent_id"""
-        raise NotImplementedError
+        return self.env.get_obs_agent(agent_id)
 
     def get_obs_size(self):
         """Returns the shape of the observation"""
-        raise NotImplementedError
+        return self.env.get_obs_size()
 
     def get_state(self):
-        raise NotImplementedError
+        return self.env.get_state()
 
     def get_state_size(self):
         """Returns the shape of the state"""
-        raise NotImplementedError
+        return self.env.get_state_size()
 
     def get_avail_actions(self):
-        raise NotImplementedError
+        return self.env.get_avail_actions()
 
     def get_avail_agent_actions(self, agent_id):
         """Returns the available actions for agent_id"""
-        raise NotImplementedError
+        return self.env.get_avail_agent_actions(agent_id)
 
     def get_total_actions(self):
         """Returns the total number of actions an agent could ever take"""
-        # TODO: This is only suitable for a discrete 1 dimensional action space for each agent
-        raise NotImplementedError
+        return self.env.get_total_actions()
 
     def reset(self, seed=None, options=None):
         """Returns initial observations and info"""
-        raise NotImplementedError
+        if seed is not None:
+            self.env.seed(seed)
+        obss, _ = self.env.reset()
+        return obss, {}
 
     def render(self):
-        raise NotImplementedError
+        self.env.render()
 
     def close(self):
-        raise NotImplementedError
+        self.env.close()
 
     def seed(self, seed=None):
-        raise NotImplementedError
+        self.env.seed(seed)
 
     def save_replay(self):
-        raise NotImplementedError
+        self.env.save_replay()
 
     def get_env_info(self):
-        env_info = {
-            "state_shape": self.get_state_size(),
-            "obs_shape": self.get_obs_size(),
-            "n_actions": self.get_total_actions(),
-            "n_agents": self.n_agents,
-            "episode_limit": self.episode_limit,
-        }
-        return env_info
+        return self.env.get_env_info()
 
     def get_stats(self):
-        return {}
+        return self.env.get_stats()
