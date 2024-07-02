@@ -2,12 +2,17 @@ import os
 import sys
 
 from smac.env import StarCraft2Env
-import smaclite  # noqa
 
 from .multiagentenv import MultiAgentEnv
 from .gymma import GymmaWrapper
 from .smac_wrapper import SMACWrapper
 from .smaclite_wrapper import SMACliteWrapper
+
+
+if sys.platform == "linux":
+    os.environ.setdefault(
+        "SC2PATH", os.path.join(os.getcwd(), "3rdparty", "StarCraftII")
+    )
 
 
 def smac_fn(**kwargs) -> MultiAgentEnv:
@@ -37,10 +42,5 @@ def gymma_fn(**kwargs) -> MultiAgentEnv:
 
 REGISTRY = {}
 REGISTRY["sc2"] = smac_fn
-
-if sys.platform == "linux":
-    os.environ.setdefault(
-        "SC2PATH", os.path.join(os.getcwd(), "3rdparty", "StarCraftII")
-    )
-
+REGISTRY["smaclite"] = smaclite_fn
 REGISTRY["gymma"] = gymma_fn

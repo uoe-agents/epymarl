@@ -1,5 +1,5 @@
-lbforaging
-rware
+# lbforaging
+# rware
 pettingzoo
 # git+https://github.com/uoe-agents/matrix-games.git
 pysc2==3.0.0
