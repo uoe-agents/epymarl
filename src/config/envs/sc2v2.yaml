@@ -1,0 +1,13 @@
+env: "sc2v2"
+
+env_args:
+  map_name: null
+  time_limit: 150
+
+test_greedy: True
+test_nepisode: 100
+test_interval: 50000
+log_interval: 50000
+runner_log_interval: 10000
+learner_log_interval: 10000
+t_max: 2050000

@@ -1,11 +1,29 @@
-from smac.env import StarCraft2Env
+from pathlib import Path
+import yaml
+
+from smacv2.env.starcraft2.wrapper import StarCraftCapabilityEnvWrapper
 
 from .multiagentenv import MultiAgentEnv
 
 
-class SMACWrapper(MultiAgentEnv):
+SMACv2_CONFIG_DIR = Path(__file__).parent.parent / "config" / "envs" / "smacv2_configs"
+
+
+def get_scenario_names():
+    return [p.name for p in SMACv2_CONFIG_DIR.iterdir()]
+
+
+def load_scenario(map_name, **kwargs):
+    scenario_path = SMACv2_CONFIG_DIR / f"{map_name}.yaml"
+    with open(scenario_path, "r") as f:
+        scenario_args = yaml.load(f, Loader=yaml.FullLoader)
+    scenario_args.update(kwargs)
+    return StarCraftCapabilityEnvWrapper(**scenario_args["env_args"])
+
+
+class SMACv2Wrapper(MultiAgentEnv):
     def __init__(self, map_name, seed, **kwargs):
-        self.env = StarCraft2Env(map_name=map_name, seed=seed, **kwargs)
+        self.env = load_scenario(map_name, seed=seed, **kwargs)
 
     def step(self, actions):
         """Returns obss, reward, terminated, truncated, info"""
@@ -68,3 +86,18 @@ class SMACWrapper(MultiAgentEnv):
 
     def get_stats(self):
         return self.env.get_stats()
+
+
+if __name__ == "__main__":
+    for scenario in get_scenario_names():
+        env = load_scenario(scenario)
+        env_info = env.get_env_info()
+        # print name of config, number of agents, state shape, observation shape, action shape
+        print(
+            scenario,
+            env_info["n_agents"],
+            env_info["state_shape"],
+            env_info["obs_shape"],
+            env_info["n_actions"],
+        )
+        print()
