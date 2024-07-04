@@ -2,50 +2,43 @@
 
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
 - **New!** Support for training in environments with individual rewards for all agents (for all algorithms that support such settings)
+- **New!** Update EPyMARL to use maintained [Gymnasium](https://gymnasium.farama.org/index.html) library instead of deprecated OpenAI Gym version 0.21.
+- **New!** Support for new environments: native integration of [PettingZoo](https://pettingzoo.farama.org/), [matrix games](https://github.com/uoe-agents/matrix-games), [SMACv2](https://github.com/oxwhirl/smacv2), and [SMAClite](https://github.com/uoe-agents/smaclite)
 - **New!** Support for logging to [weights and biases (W&B)](https://wandb.ai/)
+- **New!** We added a simple plotting script to visualise run data
 - Additional algorithms (IA2C, IPPO, MADDPG, MAA2C and MAPPO)
-- Support for [Gym](https://github.com/openai/gym) environments (on top of the existing SMAC support)
 - Option for no-parameter sharing between agents (original PyMARL only allowed for parameter sharing)
 - Flexibility with extra implementation details (e.g. hard/soft updates, reward standarization, and more)
 - Consistency of implementations between different algorithms (fair comparisons)
 
 See our blog post here: https://agents.inf.ed.ac.uk/blog/epymarl/
 
-## Update as of *June 2024*!
+## Update as of *July 2024*!
+
+### Update to Gymnasium
+It became increasingly difficult to install and rely on the deprecated OpenAI Gym version 0.21 EPyMARL previously depended on, so we we moved EPyMARL to use the maintained [Gymnasium](https://gymnasium.farama.org/index.html) library and API. This move required updating of several environments that were built to work with EPyMARL's `gymma` wrapper, including [level-based foraging](https://github.com/uoe-agents/lb-foraging) and [multi-robot warehouse](https://github.com/uoe-agents/robotic-warehouse). Alongside this update to EPyMARL, we therefore also updated these environments as well as [SMAClite](https://github.com/uoe-agents/smaclite), [matrix games](https://github.com/uoe-agents/matrix-games), and wrote wrappers to maintain compatibility with [SMAC](https://github.com/oxwhirl/smac) and added integration for [SMACv2](https://github.com/oxwhirl/smacv2). We hope these changes will simplify integration of new environments and ensure that EPyMARL remains usable for a longer time.
+
+For more information on how to install and run experiments in these environments, see [the documentation here](#installing-and-running-environments).
+
 
 ### Support for training in environments with individual rewards for all agents
-Previously PyMARL and EPyMARL only supported training of MARL algorithms in common-reward environments. To support environments which naturally provide individual rewards for agents (e.g. LBF and RWARE), we previously scalarised the rewards of all agents using a sum operation to obtain a single common reward that was then given to all agents. We are glad to announce that EPyMARL now supports training in general-sum reward environments (for all algorithms that are sound to train in general-sum reward settings)!
+Previously EPyMARL only supported training of MARL algorithms in common-reward environments. To support environments which naturally provide individual rewards for agents (e.g. LBF and RWARE), we previously scalarised the rewards of all agents using a sum operation to obtain a single common reward that was then given to all agents. We are glad to announce that EPyMARL now supports training in general-sum reward environments (for all algorithms that are sound to train in general-sum reward settings)!
 
 - **Algorithms that support general-sum reward envs**: IA2C, IPPO, MAA2C, MAPPO, IQL, PAC
 - Algorithms that only support common-reward envs: COMA, VDN, QMIX, QTRAN
 
 By default, EPyMARL runs experiments with common rewards (as done previously). To run an experiment with individual rewards for all agents, set `common_reward=False`. For example to run MAPPO in a LBF task with individual rewards:
 ```sh
-python3 src/main.py --config=mappo --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2" common_reward=False
+python3 src/main.py --config=mappo --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v3" common_reward=False
 ```
 When using the `common_reward=True` setup in environments which naturally provide individual rewards, by default we scalarise the rewards into a common reward by summing up all rewards. This is now configurable and we support the mean operation as an alternative scalarisation. To use the mean scalarisation, set `reward_scalarisation="mean"`.
 
-### Plotting script
-We have added a simple plotting script under `plot_results.py` to load data from sacred logs and visualise them for executed experiments. The script supports plotting of any logged metric, can apply simple window-smoothing, aggregates results across multiple runs of the same algorithm, and can filter which results to plot based on algorithm and environment names.
-
-If multiple configs of the same algorithm exist within the loaded data and you only want to plot the best config per algorithm, then add the `--best_per_alg` argument! If this argument is not set, the script will visualise all configs of each (filtered) algorithm and show the values of the hyperparameter config that differ across all present configs in the legend.
-
 ### Weights and Biases (W&B) Logging
-We now support logging to W&B! To log data to W&B, you need to install the library with `pip install wandb` and setup W&B (see their [documentation](https://docs.wandb.ai/quickstart)). To tell EPyMARL to log data to W&B, you then need to specify the following config parameters:
-```yaml
-use_wandb: True # Log results to W&B
-wandb_team: null # W&B team name
-wandb_project: null # W&B project name
-```
-to specify the team and project you wish to log to within your account, and set `use_wandb=True`. By default, we log all W&B runs in "offline" mode, i.e. the data will only be stored locally and can be uploaded to your W&B account via `wandb sync ...`. To directly log runs online, please specify `wandb_mode="online"` within the config.
+We now support logging to W&B! To log data to W&B, you need to install the library with `pip install wandb` and setup W&B (see their [documentation](https://docs.wandb.ai/quickstart)). After, follow [our instructions](#weights-and-biases).
 
-We also support logging all stored models directly to W&B so you can download and inspect these from the W&B online dashboard. To do so, use the following config parameters:
-```yaml
-wandb_save_model: True # Save models to W&B (only done if use_wandb is True and save_model is True)
-save_model: True # Save the models to disk
-save_model_interval: 50000
-```
-Note that models are only saved in general if `save_model=True` and to further log them to W&B you need to specify `use_wandb`, `wandb_team`, `wandb_project`, and `wandb_save_model=True`.
+### Plotting script
+We have added a simple plotting script under `plot_results.py` to load data from sacred logs and visualise them for executed experiments. For more details, see [the documentation here](#plotting).
+
 
 ## Update as of *15th July 2023*!
 We have released our _Pareto Actor-Critic_ algorithm, accepted in TMLR, as part of the E-PyMARL source code. 
@@ -82,118 +75,140 @@ python3 main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 en
 
 # Installation & Run instructions
 
-For information on installing and using this codebase with SMAC, we suggest visiting and reading the original [PyMARL](https://github.com/oxwhirl/pymarl) README. Here, we maintain information on using the extra features EPyMARL offers. To install the codebase, clone this repo and run:
+## Installing Dependencies
+
+To install the dependencies for the codebase, clone this repo and run:
 ```sh
 pip install -r requirements.txt
 ```
 
-Note that the PAC algorithm and environments introduce additional dependencies. To install these dependencies, use the provided requirements files:
+To install a set of supported environments, you can use the provided `env_requirements.txt`:
 ```sh
-# install PAC dependencies
+pip install -r env_requirements.txt
+```
+which will install the following environments:
+- [Level Based Foraging](https://github.com/uoe-agents/lb-foraging)
+- [Multi-Robot Warehouse](https://github.com/uoe-agents/robotic-warehouse)
+- [PettingZoo](https://github.com/semitable/multiagent-particle-envs) (used for the multi-agent particle environment)
+- [Matrix games](https://github.com/uoe-agents/matrix-games)
+- [SMAC](https://github.com/oxwhirl/smac)
+- [SMACv2](https://github.com/oxwhirl/smacv2)
+- [SMAClite](https://github.com/uoe-agents/smaclite)
+
+To install these environments individually, please see instructions in the respective repositories. We note that in particular SMAC and SMACv2 require a StarCraft II installation with specific map files. See their documentation for more details.
+
+Note that the [PAC algorithm](#update-as-of-15th-july-2023) introduces separate dependencies. To install these dependencies, use the provided requirements file:
+```sh
 pip install -r pac_requirements.txt
-# install environments
-pip install -r env_requirements.txt
 ```
 
-## Installing Environments
 
-In [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/abs/2006.07869) we introduce the Level-Based Foraging (LBF) and Multi-Robot Warehouse (RWARE) environments, and additionally evaluate in SMAC, Multi-agent Particle environments. and a set of matrix games.
+## Benchmark Paper Experiments
 
-To install all environments, you can use the provided `env_requirements.txt`:
+In ["Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks"](https://arxiv.org/abs/2006.07869) we introduce the Level-Based Foraging (LBF) and Multi-Robot Warehouse (RWARE) environments, and additionally evaluate in SMAC, Multi-agent Particle environments, and a set of matrix games. After installing these environments (see instructions above), we can run experiments in these environments as follows:
+
+Matrix games:
 ```sh
-pip install -r env_requirements.txt
+python main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="matrixgames:penalty-100-nostate-v0"
 ```
-which will install LBF, RWARE, SMAC, our MPE form, and matrix games.
 
-
-To install these individually, please visit:
-- [Level Based Foraging](https://github.com/uoe-agents/lb-foraging) or install with `pip install lbforaging`
-- [Multi-Robot Warehouse](https://github.com/uoe-agents/robotic-warehouse) or install with `pip install rware`
-- [Our fork of MPE](https://github.com/semitable/multiagent-particle-envs), clone it and install it with `pip install -e .`
-- [Matrix games](https://github.com/uoe-agents/matrix-games), clone it and install with `pip install -e .`
-
-Example of using LBF:
+LBF:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v3"
 ```
-Example of using RWARE:
+
+RWARE:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=500 env_args.key="rware:rware-tiny-2ag-v1"
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=500 env_args.key="rware:rware-tiny-2ag-v2"
 ```
 
-For MPE, our fork is needed. Essentially all it does (other than fixing some gym compatibility issues) is i) registering the environments with the gym interface when imported as a package and ii) correctly seeding the environments iii) makes the action space compatible with Gym (I think MPE originally does a weird one-hot encoding of the actions).
-
-The environments names in MPE are:
-```
-...
-    "multi_speaker_listener": "MultiSpeakerListener-v0",
-    "simple_adversary": "SimpleAdversary-v0",
-    "simple_crypto": "SimpleCrypto-v0",
-    "simple_push": "SimplePush-v0",
-    "simple_reference": "SimpleReference-v0",
-    "simple_speaker_listener": "SimpleSpeakerListener-v0",
-    "simple_spread": "SimpleSpread-v0",
-    "simple_tag": "SimpleTag-v0",
-    "simple_world_comm": "SimpleWorldComm-v0",
-...
-```
-Therefore, after installing them you can run it using:
+MPE:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleSpeakerListener-v0"
+python main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="pz-mpe-simple-spread-v3"
 ```
+Note that for the MPE environments tag (predator-prey) and adversary, we provide pre-trained prey and adversary policies. These can be used to control the respective agents to make these tasks fully cooperative (useed in the paper) by setting `env_args.pretrained_wrapper="PretrainedTag"` or `env_args.pretrained_wrapper="PretrainedAdversary"`.
 
-The pretrained agents are included in this repo [here](https://github.com/uoe-agents/epymarl/tree/main/src/pretrained). You can use them with:
+SMAC:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleAdversary-v0" env_args.pretrained_wrapper="PretrainedAdversary"
+python main.py --config=qmix --env-config=sc2 with env_args.map_name="3s5z"
 ```
-and
+
+Below, we provide the base environment and key / map name for all the environments evaluated in the "Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks":
+
+- Matrix games: all with `--env-config=gymma with env_args.time_limit=25 env_args.key="..."`
+  - Climbing: `matrixgames:climbing-nostate-v0`
+  - Penalty $k=0$: `matrixgames:penalty-0-nostate-v0`
+  - Penalty $k=-25$: `matrixgames:penalty-25-nostate-v0`
+  - Penalty $k=-50$: `matrixgames:penalty-50-nostate-v0`
+  - Penalty $k=-75$: `matrixgames:penalty-75-nostate-v0`
+  - Penalty $k=-100$: `matrixgames:penalty-100-nostate-v0`
+- LBF: all with `--env-config=gymma with env_args.time_limit=50 env_args.key="..."`
+  - 8x8-2p-2f-coop: `lbforaging:Foraging-8x8-2p-2f-coop-v3`
+  - 8x8-2p-2f-2s-coop: `lbforaging:Foraging-2s-8x8-2p-2f-coop-v3`
+  - 10x10-3p-3f: `lbforaging:Foraging-10x10-3p-3f-v3`
+  - 10x10-3p-3f-2s: `lbforaging:Foraging-2s-10x10-3p-3f-v3`
+  - 15x15-3p-5f: `lbforaging:Foraging-15x15-3p-5f-v3`
+  - 15x15-4p-3f: `lbforaging:Foraging-15x15-4p-3f-v3`
+  - 15x15-4p-5f: `lbforaging:Foraging-15x15-4p-5f-v3`
+- RWARE: all with `--env-config=gymma with env_args.time_limit=500 env_args.key="..."`
+  - tiny 2p: `rware:rware-tiny-2ag-v2`
+  - tiny 4p: `rware:rware-tiny-4ag-v2`
+  - small 4p: `rware:rware-small-4ag-v2`
+- MPE: all with `--env-config=gymma with env_args.time_limit=25 env_args.key="..."`
+  - simple speaker listener: `pz-mpe-simple-speaker-listener-v4`
+  - simple spread: `pz-mpe-simple-spread-v3`
+  - simple adversary: `pz-mpe-simple-adversary-v3` with additional `env_args.pretrained_wrapper="PretrainedAdversary"`
+  - simple tag: `pz-mpe-simple-tag-v3` with additional `env_args.pretrained_wrapper="PretrainedTag"`
+- SMAC: all with `--env-config=sc2 with env_args.map_name="..."`
+  - 2s_vs_1sc: `2s_vs_1sc`
+  - 3s5z: `3s5z`
+  - corridor: `corridor`
+  - MMM2: `MMM2`
+  - 3s_vs_5z: `3s_vs_5z`
+  
+## Experiments in SMACv2 and SMAClite
+
+EPyMARL now supports the new SMACv2 and SMAClite environments. We provide wrappers to integrate these environments into the Gymnasium interface of EPyMARL. To run experiments in these environments, you can use the following exemplary commands:
+
+SMACv2:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="mpe:SimpleTag-v0" env_args.pretrained_wrapper="PretrainedTag"
+python src/main.py --config=qmix --env-config=sc2v2 with env_args.map_name="protoss_5_vs_5"
 ```
+We provide prepared configs for a range of SMACv2 scenarios, as described in the [SMACv2 repository](https://github.com/oxwhirl/smacv2), under `src/config/envs/smacv2_configs`. These can be run by providing the name of the config file as the `env_args.map_name` argument. To define a new scenario, you can create a new config file in the same format as the provided ones and provide its name as the `env_args.map_name` argument.
 
-## Installing MARBLER
-
-[MARBLER](https://github.com/GT-STAR-Lab/MARBLER) is a gym built for [the Robotarium](https://www.robotarium.gatech.edu) to enable free and effortless Sim2Real evaluation of algorithms. Clone it and follow the instructions on its Github to install it.
-
-Example of using MARBLER:
+SMAClite:
 ```sh
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=10000 env_args.key="robotarium_gym:PredatorCapturePrey-v0"
+python src/main.py --config=qmix --env-config=smaclite with env_args.time_limit=150 env_args.map_name="MMM"
 ```
 
-## Using A Custom Gym Environment
+## Registering and Running Experiments in Custom Environments
 
-EPyMARL supports environments that have been registered with Gym. 
-The only difference with the Gym framework would be that the returned rewards should be a tuple (one reward for each agent). In this cooperative framework we sum these rewards together.
+EPyMARL supports environments that have been registered with Gymnasium. If you would like to use any other Gymnasium environment, you can do so by using the `gymma` environment with the `env_args.key` argument being provided with the registration ID of the environment. Environments can either provide a single scalar reward to run common reward experiments (`common_reward=True`), or should provide one environment per agent to run experiments with individual rewards (`common_reward=False`) or with common rewards using some reward scalarisation (see [documentation](#support-for-training-in-environments-with-individual-rewards-for-all-agents) for more details). 
 
-Environments that are supported out of the box are the ones that are registered in Gym automatically. Examples are: [Level-Based Foraging](https://github.com/semitable/lb-foraging) and [RWARE](https://github.com/semitable/robotic-warehouse). 
-
-To register a custom environment with Gym, use the template below (taken from Level-Based Foraging).
+To register a custom environment with Gymnasium, use the template below:
 ```python
-from gym.envs.registration import registry, register, make, spec
+from gymnasium import register
+
 register(
-  id="Foraging-8x8-2p-3f-v2",                     # Environment ID.
-  entry_point="lbforaging.foraging:ForagingEnv",  # The entry point for the environment class
+  id="my-environment-v1",                         # Environment ID.
+  entry_point="myenv.environment:MyEnvironment",  # The entry point for the environment class
   kwargs={
-            ...                                   # Arguments that go to ForagingEnv's __init__ function.
+            ...                                   # Arguments that go to MyEnvironment's __init__ function.
         },
     )
 ```
 
-# Run an experiment on a Gym environment
-
-```shell
-python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v2"
+After, you can run an experiment in this environment using the following command:
+```sh
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=50 env_args.key="myenv:my-environment-v1"
 ```
- In the above command `--env-config=gymma` (in constrast to `sc2` will use a Gym compatible wrapper). `env_args.time_limit=50` sets the maximum episode length to 50 and `env_args.key="..."` provides the Gym's environment ID. In the ID, the `lbforaging:` part is the module name (i.e. `import lbforaging` will run automatically).
+assuming that the environment is registered with the ID `my-environment-v1` in the installed library `myenv`.
 
+# Experiment Configurations
 
-The config files act as defaults for an algorithm or environment. 
+EPyMARL defines yaml configuration files for algorithms and environments under `src/config`. `src/config/default.yaml` defines default values for a range of configuration options, including experiment information (`t_max` for number of timesteps of training etc.) and algorithm hyperparameters.
 
-They are all located in `src/config`.
-`--config` refers to the config files in `src/config/algs`
-`--env-config` refers to the config files in `src/config/envs`
-
-All results will be stored in the `Results` folder.
+Further environment configs (provided to the main script via `--env-config=...`) can be found in `src/config/envs`. Algorithm configs specifying algorithms and their hyperparameters (provided to the main script via `--config=...`) can be found in `src/config/algs`. To change hyperparameters or define a new algorithm, you can modify these yaml config files or create new ones.
 
 # Run a hyperparameter search
 
@@ -207,6 +222,30 @@ python search.py run --config=search.config.example.yaml --seeds 5 single 1
 ```
 where the 1 is an index to the particular hyperparameter configuration and can take values from 1 to the number of different combinations.
 
+# Logging
+
+By default, EPyMARL will use sacred to log results and models to the `results` directory. These logs include configuration files, a json of all metrics, a txt file of all outputs and more. Additionally, EPyMARL can log data to tensorboard files by setting `use_tensorboard: True` in the yaml config. We also added support to log data to [weights and biases (W&B)](https://wandb.ai/) with instructions below.
+
+## Weights and Biases
+
+First, make sure to install W&B and follow their instructions to authenticate and setup your W&B library (see the [quickstart guide](https://docs.wandb.ai/quickstart) for more details).
+
+To tell EPyMARL to log data to W&B, you then need to specify the following config parameters:
+```yaml
+use_wandb: True # Log results to W&B
+wandb_team: null # W&B team name
+wandb_project: null # W&B project name
+```
+to specify the team and project you wish to log to within your account, and set `use_wandb=True`. By default, we log all W&B runs in "offline" mode, i.e. the data will only be stored locally and can be uploaded to your W&B account via `wandb sync ...`. To directly log runs online, please specify `wandb_mode="online"` within the config.
+
+We also support logging all stored models directly to W&B so you can download and inspect these from the W&B online dashboard. To do so, use the following config parameters:
+```yaml
+wandb_save_model: True # Save models to W&B (only done if use_wandb is True and save_model is True)
+save_model: True # Save the models to disk
+save_model_interval: 50000
+```
+Note that models are only saved in general if `save_model=True` and to further log them to W&B you need to specify `use_wandb`, `wandb_team`, `wandb_project`, and `wandb_save_model=True`.
+
 # Saving and loading learnt models
 
 ## Saving models
@@ -218,6 +257,12 @@ You can save the learnt models to disk by setting `save_model = True`, which is 
 Learnt models can be loaded using the `checkpoint_path` and `load_step` parameters. `checkpoint_path` should point to a directory stored for a run by epymarl as stated above. The pointed-to directory should contain sub-directories for various timesteps at which checkpoints were stored. If `load_step` is not provided (by default `load_step=0`) then the last checkpoint of the pointed-to run is loaded. Otherwise the checkpoint of the closest timestep to `load_step` will be loaded. After loading, the learning will proceed from the corresponding timestep.
 
 To only evaluate loaded models without any training, set the `checkpoint_path` and `load_step` parameters accordingly for the loading, and additionally set `evaluate=True`. Then, the loaded checkpoint will be evaluated for `test_nepisode` episodes before terminating the run.
+
+# Plotting
+
+The plotting script provided as `plot_results.py` supports plotting of any logged metric, can apply simple window-smoothing, aggregates results across multiple runs of the same algorithm, and can filter which results to plot based on algorithm and environment names.
+
+If multiple configs of the same algorithm exist within the loaded data and you only want to plot the best config per algorithm, then add the `--best_per_alg` argument! If this argument is not set, the script will visualise all configs of each (filtered) algorithm and show the values of the hyperparameter config that differ across all present configs in the legend.
 
 # Citing EPyMARL and PyMARL
 
