@@ -29,7 +29,7 @@ Previously EPyMARL only supported training of MARL algorithms in common-reward e
 
 By default, EPyMARL runs experiments with common rewards (as done previously). To run an experiment with individual rewards for all agents, set `common_reward=False`. For example to run MAPPO in a LBF task with individual rewards:
 ```sh
-python3 src/main.py --config=mappo --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v3" common_reward=False
+python src/main.py --config=mappo --env-config=gymma with env_args.time_limit=50 env_args.key="lbforaging:Foraging-8x8-2p-3f-v3" common_reward=False
 ```
 When using the `common_reward=True` setup in environments which naturally provide individual rewards, by default we scalarise the rewards into a common reward by summing up all rewards. This is now configurable and we support the mean operation as an alternative scalarisation. To use the mean scalarisation, set `reward_scalarisation="mean"`.
 
@@ -55,21 +55,25 @@ pip install -r pac_requirements.txt
 
 To run Pareto-AC in an environment, for example the Penalty game, you can run:
 ```sh
-python3 main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
+python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
 ```
 
 # Table of Contents
 - [Extended Python MARL framework - EPyMARL](#extended-python-marl-framework---epymarl)
 - [Table of Contents](#table-of-contents)
 - [Installation & Run instructions](#installation--run-instructions)
-  - [Installing LBF, RWARE, and MPE](#installing-lbf-rware-and-mpe)
-  - [Installing MARBLER for Sim2Real Evaluation](#installing-marbler)
-  - [Using A Custom Gym Environment](#using-a-custom-gym-environment)
-- [Run an experiment on a Gym environment](#run-an-experiment-on-a-gym-environment)
+  - [Installing Dependencies](#installing-dependencies)
+  - [Benchmark Paper Experiments](#benchmark-paper-experiments)
+  - [Experiments in SMACv2 and SMAClite](#experiments-in-smacv2-and-smaclite)
+  - [Registering and Running Experiments in Custom Environments](#registering-and-running-experiments-in-custom-environments)
+- [Experiment Configurations](#experiment-configurations)
 - [Run a hyperparameter search](#run-a-hyperparameter-search)
+- [Logging](#logging)
+  - [Weights and Biases](#weights-and-biases)
 - [Saving and loading learnt models](#saving-and-loading-learnt-models)
   - [Saving models](#saving-models)
   - [Loading models](#loading-models)
+- [Plotting](#plotting)
 - [Citing PyMARL and EPyMARL](#citing-pymarl-and-epymarl)
 - [License](#license)
 
