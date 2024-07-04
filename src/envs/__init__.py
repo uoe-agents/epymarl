@@ -3,9 +3,6 @@ import sys
 
 from .multiagentenv import MultiAgentEnv
 from .gymma import GymmaWrapper
-from .smac_wrapper import SMACWrapper
-
-# from .smacv2_wrapper import SMACv2Wrapper
 from .smaclite_wrapper import SMACliteWrapper
 
 
@@ -26,16 +23,6 @@ def __check_and_prepare_smac_kwargs(kwargs):
     return kwargs
 
 
-def smac_fn(**kwargs) -> MultiAgentEnv:
-    kwargs = __check_and_prepare_smac_kwargs(kwargs)
-    return SMACWrapper(**kwargs)
-
-
-# def smacv2_fn(**kwargs) -> MultiAgentEnv:
-#     kwargs = __check_and_prepare_smac_kwargs(kwargs)
-#     return SMACv2Wrapper(**kwargs)
-
-
 def smaclite_fn(**kwargs) -> MultiAgentEnv:
     kwargs = __check_and_prepare_smac_kwargs(kwargs)
     return SMACliteWrapper(**kwargs)
@@ -47,7 +34,27 @@ def gymma_fn(**kwargs) -> MultiAgentEnv:
 
 
 REGISTRY = {}
-REGISTRY["sc2"] = smac_fn
-# REGISTRY["sc2v2"] = smacv2_fn
 REGISTRY["smaclite"] = smaclite_fn
 REGISTRY["gymma"] = gymma_fn
+
+
+# registering both smac and smacv2 causes a pysc2 error
+# --> dynamically register the needed env
+def register_smac():
+    from .smac_wrapper import SMACWrapper
+
+    def smac_fn(**kwargs) -> MultiAgentEnv:
+        kwargs = __check_and_prepare_smac_kwargs(kwargs)
+        return SMACWrapper(**kwargs)
+
+    REGISTRY["sc2"] = smac_fn
+
+
+def register_smacv2():
+    from .smacv2_wrapper import SMACv2Wrapper
+
+    def smacv2_fn(**kwargs) -> MultiAgentEnv:
+        kwargs = __check_and_prepare_smac_kwargs(kwargs)
+        return SMACv2Wrapper(**kwargs)
+
+    REGISTRY["sc2v2"] = smacv2_fn

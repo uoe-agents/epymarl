@@ -6,6 +6,7 @@ from .multiagentenv import MultiAgentEnv
 class SMACWrapper(MultiAgentEnv):
     def __init__(self, map_name, seed, **kwargs):
         self.env = StarCraft2Env(map_name=map_name, seed=seed, **kwargs)
+        self.episode_limit = self.env.episode_limit
 
     def step(self, actions):
         """Returns obss, reward, terminated, truncated, info"""

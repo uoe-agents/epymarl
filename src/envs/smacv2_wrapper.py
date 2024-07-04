@@ -24,6 +24,7 @@ def load_scenario(map_name, **kwargs):
 class SMACv2Wrapper(MultiAgentEnv):
     def __init__(self, map_name, seed, **kwargs):
         self.env = load_scenario(map_name, seed=seed, **kwargs)
+        self.episode_limit = self.env.episode_limit
 
     def step(self, actions):
         """Returns obss, reward, terminated, truncated, info"""
