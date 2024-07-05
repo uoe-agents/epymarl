@@ -66,6 +66,9 @@ def run(_run, _config, _log):
     # Run and train
     run_sequential(args=args, logger=logger)
 
+    # Finish logging
+    logger.finish()
+
     # Clean up after finishing
     print("Exiting Main")
 

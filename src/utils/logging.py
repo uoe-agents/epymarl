@@ -128,6 +128,12 @@ class Logger:
             log_str += "\n" if i % 4 == 0 else "\t"
         self.console_logger.info(log_str)
 
+    def finish(self):
+        if self.use_wandb:
+            if self.wandb_current_data:
+                self.wandb.log(self.wandb_current_data, step=self.wandb_current_t)
+            self.wandb.finish()
+
 
 # set up a custom logger
 def get_logger():
