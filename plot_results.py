@@ -101,7 +101,11 @@ def load_results(path, metric):
     for file in metrics_files:
         # load json
         with open(file, "r") as f:
-            metrics = json.load(f)
+            try:
+                metrics = json.load(f)
+            except json.JSONDecodeError:
+                warnings.warn(f"Could not load metrics from {file} --> skipping")
+                continue
 
         # find corresponding config file
         config_file = file.parent / "config.json"
