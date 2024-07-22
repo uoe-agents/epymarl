@@ -1,7 +1,9 @@
-lbforaging
-rware
-git+https://github.com/semitable/multiagent-particle-envs.git
-git+https://github.com/uoe-agents/matrix-games.git
+# lbforaging
+# rware
+pettingzoo
+# git+https://github.com/uoe-agents/matrix-games.git
 pysc2==3.0.0
 s2clientprotocol==4.10.1.75800.0
 git+https://github.com/oxwhirl/smac.git
+git+https://github.com/oxwhirl/smacv2.git
+# git+https://github.com/uoe-agents/smaclite.git

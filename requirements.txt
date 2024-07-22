@@ -1,7 +1,7 @@
 absl-py
 attrs
 click
-gym==0.21.0
+gymnasium
 idna==2.7
 imageio
 matplotlib
@@ -16,11 +16,12 @@ protobuf
 py==1.6.0
 pygame
 pyparsing==2.2.2
-pytest==4.3.1
+pytest
 python-dateutil==2.7.3
 PyYAML==5.3.1
 requests==2.19.1
 sacred
+seaborn
 scipy
 six==1.11.0
 sk-video==1.1.10

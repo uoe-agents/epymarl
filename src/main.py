@@ -1,16 +1,22 @@
-import numpy as np
-import os
-import collections
-from os.path import dirname, abspath
+try:
+    # until python 3.10
+    from collections import Mapping
+except:
+    # from python 3.10
+    from collections.abc import Mapping
 from copy import deepcopy
+import os
+from os.path import dirname, abspath
+import sys
+import yaml
+
+import numpy as np
 from sacred import Experiment, SETTINGS
 from sacred.observers import FileStorageObserver
 from sacred.utils import apply_backspaces_and_linefeeds
-import sys
 import torch as th
-from utils.logging import get_logger
-import yaml
 
+from utils.logging import get_logger
 from run import run
 
 SETTINGS["CAPTURE_MODE"] = (
@@ -65,7 +71,7 @@ def _get_config(params, arg_name, subfolder):
 
 def recursive_dict_update(d, u):
     for k, v in u.items():
-        if isinstance(v, collections.Mapping):
+        if isinstance(v, Mapping):
             d[k] = recursive_dict_update(d.get(k, {}), v)
         else:
             d[k] = v

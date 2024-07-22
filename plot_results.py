@@ -82,13 +82,14 @@ def extract_alg_name_from_config(config):
 
 
 def extract_env_name_from_config(config):
-    if "map" in config["env_args"]:
-        env_name = config["env_args"]["map"]
+    env = config["env"]
+    if "map_name" in config["env_args"]:
+        env_name = config["env_args"]["map_name"]
     elif "key" in config["env_args"]:
         env_name = config["env_args"]["key"]
     else:
         env_name = None
-    return env_name
+    return f"{env}_{env_name}"
 
 
 def load_results(path, metric):
@@ -100,7 +101,11 @@ def load_results(path, metric):
     for file in metrics_files:
         # load json
         with open(file, "r") as f:
-            metrics = json.load(f)
+            try:
+                metrics = json.load(f)
+            except json.JSONDecodeError:
+                warnings.warn(f"Could not load metrics from {file} --> skipping")
+                continue
 
         # find corresponding config file
         config_file = file.parent / "config.json"
