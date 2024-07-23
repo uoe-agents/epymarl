@@ -3,6 +3,7 @@ env: "smaclite"
 env_args:
   map_name: null
   time_limit: 150
+  use_cpp_rvo2: False
 
 test_greedy: True
 test_nepisode: 100

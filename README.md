@@ -186,6 +186,7 @@ SMAClite:
 ```sh
 python src/main.py --config=qmix --env-config=smaclite with env_args.time_limit=150 env_args.map_name="MMM"
 ```
+By default, SMAClite uses a numpy implementation of the RVO2 library for collision avoidance. To instead use a faster optimised C++ RVO2 library, follow the instructions of [this repo](https://github.com/micadam/SMAClite-Python-RVO2) and provide the additional argument `env_args.use_cpp_rvo2=True`.
 
 ## Registering and Running Experiments in Custom Environments
 
