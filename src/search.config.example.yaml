@@ -48,5 +48,5 @@ grid-search:
 grid-search-groups:
   env0:
     - "--env-config": "gymma"
-    - env_args.key: lbforaging:Foraging-8x8-2p-3f-v0
+    - env_args.key: lbforaging:Foraging-8x8-2p-3f-v3
     - env_args.time_limit: 25

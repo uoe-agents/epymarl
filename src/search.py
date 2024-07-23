@@ -1,9 +1,6 @@
 import multiprocessing
 import subprocess
-from pathlib import Path
 from itertools import product
-from collections import defaultdict
-import re
 import yaml
 import random
 
@@ -18,13 +15,6 @@ def _flatten_lists(object):
             yield from _flatten_lists(item)
         else:
             yield item
-
-
-def _filter_configs(configs, mask):
-    ingredient, mask = _get_ingredient_from_mask(mask)
-    regex = re.compile(mask)
-    configs[ingredient] = list(filter(regex.search, configs[ingredient]))
-    return configs
 
 
 def _compute_combinations(config_file, shuffle, seeds):
@@ -73,17 +63,6 @@ def work(cmd):
 @click.group()
 def cli():
     pass
-
-
-@cli.command()
-@click.argument("output", type=click.Path(exists=False, dir_okay=False, writable=True))
-def write(output):
-    from train import ex
-
-    config_dict = dict(ex.configurations[0]())
-    config_dict = {"grid-search": config_dict, "exclude": None}
-    with open(output, "w") as f:
-        documents = yaml.dump(config_dict, f)
 
 
 @cli.group()
