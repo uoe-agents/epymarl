@@ -332,7 +332,9 @@ def plot_results(data, metric, save_dir, y_min, y_max, log_scale):
                     plt.fill_between(steps, means - stds, means + stds, alpha=ALPHA)
                     num_plots += 1
                     max_label_len = max(max_label_len, len(label))
-        plt.title(f"Common Reward: {cr} (scalarisation: {rs})")
+        title = f"{env}"
+        title += f" (common rewards; scalarisation {rs})" if cr else " (individual rewards)"
+        plt.title(title)
         plt.xlabel("Timesteps")
         plt.ylabel(metric)
 

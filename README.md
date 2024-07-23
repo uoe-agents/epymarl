@@ -57,7 +57,7 @@ pip install -r pac_requirements.txt
 
 To run Pareto-AC in an environment, for example the Penalty game, you can run:
 ```sh
-python main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
+python src/main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1 env_args.key=matrixgames:penalty-100-nostate-v0
 ```
 
 # Table of Contents
@@ -115,7 +115,7 @@ In ["Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperat
 
 Matrix games:
 ```sh
-python main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="matrixgames:penalty-100-nostate-v0"
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="matrixgames:penalty-100-nostate-v0"
 ```
 
 LBF:
@@ -130,13 +130,13 @@ python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=500
 
 MPE:
 ```sh
-python main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="pz-mpe-simple-spread-v3"
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="pz-mpe-simple-spread-v3"
 ```
 Note that for the MPE environments tag (predator-prey) and adversary, we provide pre-trained prey and adversary policies. These can be used to control the respective agents to make these tasks fully cooperative (useed in the paper) by setting `env_args.pretrained_wrapper="PretrainedTag"` or `env_args.pretrained_wrapper="PretrainedAdversary"`.
 
 SMAC:
 ```sh
-python main.py --config=qmix --env-config=sc2 with env_args.map_name="3s5z"
+python src/main.py --config=qmix --env-config=sc2 with env_args.map_name="3s5z"
 ```
 
 Below, we provide the base environment and key / map name for all the environments evaluated in the "Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks":
