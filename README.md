@@ -2,7 +2,7 @@
 
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
 - **New!** Support for training in environments with individual rewards for all agents (for all algorithms that support such settings)
-- **New!** Update EPyMARL to use maintained [Gymnasium](https://gymnasium.farama.org/index.html) library instead of deprecated OpenAI Gym version 0.21.
+- **New!** Updated EPyMARL to use maintained [Gymnasium](https://gymnasium.farama.org/index.html) library instead of deprecated OpenAI Gym version 0.21.
 - **New!** Support for new environments: native integration of [PettingZoo](https://pettingzoo.farama.org/), [matrix games](https://github.com/uoe-agents/matrix-games), [SMACv2](https://github.com/oxwhirl/smacv2), and [SMAClite](https://github.com/uoe-agents/smaclite)
 - **New!** Support for logging to [weights and biases (W&B)](https://wandb.ai/)
 - **New!** We added a simple plotting script to visualise run data
