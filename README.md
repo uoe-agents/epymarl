@@ -132,7 +132,7 @@ MPE:
 ```sh
 python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="pz-mpe-simple-spread-v3"
 ```
-Note that for the MPE environments tag (predator-prey) and adversary, we provide pre-trained prey and adversary policies. These can be used to control the respective agents to make these tasks fully cooperative (useed in the paper) by setting `env_args.pretrained_wrapper="PretrainedTag"` or `env_args.pretrained_wrapper="PretrainedAdversary"`.
+Note that for the MPE environments tag (predator-prey) and adversary, we provide pre-trained prey and adversary policies. These can be used to control the respective agents to make these tasks fully cooperative (used in the paper) by setting `env_args.pretrained_wrapper="PretrainedTag"` or `env_args.pretrained_wrapper="PretrainedAdversary"`.
 
 SMAC:
 ```sh
@@ -237,7 +237,7 @@ By default, EPyMARL will use sacred to log results and models to the `results` d
 
 First, make sure to install W&B and follow their instructions to authenticate and setup your W&B library (see the [quickstart guide](https://docs.wandb.ai/quickstart) for more details).
 
-To tell EPyMARL to log data to W&B, you then need to specify the following config parameters:
+To tell EPyMARL to log data to W&B, you then need to specify the following parameters in [your configuration](#experiment-configurations):
 ```yaml
 use_wandb: True # Log results to W&B
 wandb_team: null # W&B team name
