@@ -1,19 +1,10 @@
 from pathlib import Path
 import importlib
-import warnings
 
 import gymnasium as gym
 from gymnasium.spaces import Tuple
 
-if importlib.util.find_spec("pettingzoo") is not None:
-    import pettingzoo
-
-    PZ_AVAILABLE = True
-else:
-    warnings.warn(
-        "PettingZoo is not installed, so these environments will not be available!"
-    )
-    PZ_AVAILABLE = False
+import pettingzoo
 
 
 class PettingZooWrapper(gym.Env):
@@ -77,19 +68,18 @@ class PettingZooWrapper(gym.Env):
 
 
 # import all files within the pettingzoo library that match "**/*_v?.py" underneath library of pettingzoo
-if PZ_AVAILABLE:
-    envs = Path(pettingzoo.__path__[0]).glob("**/*_v?.py")
-    for e in envs:
-        name = e.stem.replace("_", "-")
-        lib = e.parent.stem
-        filename = e.stem
+envs = Path(pettingzoo.__path__[0]).glob("**/*_v?.py")
+for e in envs:
+    name = e.stem.replace("_", "-")
+    lib = e.parent.stem
+    filename = e.stem
 
-        gymkey = f"pz-{lib}-{name}"
-        gym.register(
-            gymkey,
-            entry_point="envs.pz_wrapper:PettingZooWrapper",
-            kwargs={
-                "lib_name": lib,
-                "env_name": filename,
-            },
-        )
+    gymkey = f"pz-{lib}-{name}"
+    gym.register(
+        gymkey,
+        entry_point="envs.pz_wrapper:PettingZooWrapper",
+        kwargs={
+            "lib_name": lib,
+            "env_name": filename,
+        },
+    )

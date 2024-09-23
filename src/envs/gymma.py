@@ -8,9 +8,21 @@ import numpy as np
 
 from .multiagentenv import MultiAgentEnv
 from .wrappers import FlattenObservation
-from .pz_wrapper import PettingZooWrapper  # noqa
-from .vmas_wrapper import VMASWrapper  # noqa
 import envs.pretrained as pretrained  # noqa
+
+try:
+    from .pz_wrapper import PettingZooWrapper  # noqa
+except ImportError:
+    warnings.warn(
+        "PettingZoo is not installed, so these environments will not be available! To install, run `pip install pettingzoo`"
+    )
+
+try:
+    from .vmas_wrapper import VMASWrapper  # noqa
+except ImportError:
+    warnings.warn(
+        "VMAS is not installed, so these environments will not be available! To install, run `pip install 'vmas[gymnasium]'`"
+    )
 
 
 class GymmaWrapper(MultiAgentEnv):
