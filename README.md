@@ -3,7 +3,7 @@
 EPyMARL is  an extension of [PyMARL](https://github.com/oxwhirl/pymarl), and includes
 - **New!** Support for training in environments with individual rewards for all agents (for all algorithms that support such settings)
 - **New!** Updated EPyMARL to use maintained [Gymnasium](https://gymnasium.farama.org/index.html) library instead of deprecated OpenAI Gym version 0.21.
-- **New!** Support for new environments: native integration of [PettingZoo](https://pettingzoo.farama.org/), [matrix games](https://github.com/uoe-agents/matrix-games), [SMACv2](https://github.com/oxwhirl/smacv2), and [SMAClite](https://github.com/uoe-agents/smaclite)
+- **New!** Support for new environments: native integration of [PettingZoo](https://pettingzoo.farama.org/), [VMAS](https://github.com/proroklab/VectorizedMultiAgentSimulator), [matrix games](https://github.com/uoe-agents/matrix-games), [SMACv2](https://github.com/oxwhirl/smacv2), and [SMAClite](https://github.com/uoe-agents/smaclite)
 - **New!** Support for logging to [weights and biases (W&B)](https://wandb.ai/)
 - **New!** We added a simple plotting script to visualise run data
 - Additional algorithms (IA2C, IPPO, MADDPG, MAA2C and MAPPO)
@@ -95,7 +95,8 @@ pip install -r env_requirements.txt
 which will install the following environments:
 - [Level Based Foraging](https://github.com/uoe-agents/lb-foraging)
 - [Multi-Robot Warehouse](https://github.com/uoe-agents/robotic-warehouse)
-- [PettingZoo](https://github.com/semitable/multiagent-particle-envs) (used for the multi-agent particle environment)
+- [PettingZoo](https://github.com/Farama-Foundation/PettingZoo) (used for the multi-agent particle environment)
+- [VMAS](https://github.com/proroklab/VectorizedMultiAgentSimulator)
 - [Matrix games](https://github.com/uoe-agents/matrix-games)
 - [SMAC](https://github.com/oxwhirl/smac)
 - [SMACv2](https://github.com/oxwhirl/smacv2)
@@ -107,7 +108,6 @@ Note that the [PAC algorithm](#update-as-of-15th-july-2023) introduces separate 
 ```sh
 pip install -r pac_requirements.txt
 ```
-
 
 ## Benchmark Paper Experiments
 
@@ -187,6 +187,20 @@ SMAClite:
 python src/main.py --config=qmix --env-config=smaclite with env_args.time_limit=150 env_args.map_name="MMM"
 ```
 By default, SMAClite uses a numpy implementation of the RVO2 library for collision avoidance. To instead use a faster optimised C++ RVO2 library, follow the instructions of [this repo](https://github.com/micadam/SMAClite-Python-RVO2) and provide the additional argument `env_args.use_cpp_rvo2=True`.
+
+## Experiments in PettingZoo and VMAS
+
+EPyMARL supports the PettingZoo and VMAS libraries for multi-agent environments using wrappers. To run experiments in these environments, you can use the following exemplary commands:
+
+PettingZoo:
+```sh
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=25 env_args.key="pz-mpe-simple-spread-v3"
+```
+
+VMAS:
+```sh
+python src/main.py --config=qmix --env-config=gymma with env_args.time_limit=150 env_args.key="vmas-balance"
+```
 
 ## Registering and Running Experiments in Custom Environments
 
