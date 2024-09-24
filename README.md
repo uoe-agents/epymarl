@@ -67,6 +67,7 @@ python src/main.py --config=pac_ns --env-config=gymma with env_args.time_limit=1
   - [Installing Dependencies](#installing-dependencies)
   - [Benchmark Paper Experiments](#benchmark-paper-experiments)
   - [Experiments in SMACv2 and SMAClite](#experiments-in-smacv2-and-smaclite)
+  - [Experiments in PettingZoo and VMAS](#experiments-in-pettingzoo-and-vmas)
   - [Registering and Running Experiments in Custom Environments](#registering-and-running-experiments-in-custom-environments)
 - [Experiment Configurations](#experiment-configurations)
 - [Run a hyperparameter search](#run-a-hyperparameter-search)
