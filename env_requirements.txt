@@ -1,6 +1,7 @@
 lbforaging
 rware
 pettingzoo
+vmas[gymnasium]
 git+https://github.com/uoe-agents/matrix-games.git
 git+https://github.com/uoe-agents/smaclite.git
 pysc2==3.0.0
