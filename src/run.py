@@ -106,10 +106,21 @@ def run_sequential(args, logger):
     args.state_shape = env_info["state_shape"]
 
     # Default/Base scheme
+    print(f"ARGS.agent_output_type equals {args.agent_output_type}")
+    if (args.agent_output_type == 'continuous_u_std'): # Continuous actions; different shape.
+        actions_shape = {"vshape": env_info["n_actions"], "group": "agents", "dtype": th.float}
+        # Continuous spaces require mean and standard deviation
+        args.n_actions = env_info["n_actions"] * 2
+        print(f"ARGS.N_ACTIONS equals {args.n_actions}")
+        # Inform the training module about the space shape
+        args.action_min = env_info["action_min"]
+        args.action_max = env_info["action_max"]
+    else:
+        actions_shape = {"vshape": (1,), "group": "agents", "dtype": th.long}
     scheme = {
         "state": {"vshape": env_info["state_shape"]},
         "obs": {"vshape": env_info["obs_shape"], "group": "agents"},
-        "actions": {"vshape": (1,), "group": "agents", "dtype": th.long},
+        "actions": actions_shape,
         "avail_actions": {
             "vshape": (env_info["n_actions"],),
             "group": "agents",

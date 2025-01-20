@@ -18,7 +18,7 @@ pygame
 pyparsing
 pytest
 python-dateutil
-PyYAML==5.3.1
+PyYAML
 requests
 sacred
 seaborn
@@ -34,3 +34,4 @@ urllib3
 websocket-client
 whichcraft
 wrapt
+sacred

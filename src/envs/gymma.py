@@ -8,21 +8,8 @@ import numpy as np
 
 from .multiagentenv import MultiAgentEnv
 from .wrappers import FlattenObservation
+from .pz_wrapper import PettingZooWrapper  # noqa
 import envs.pretrained as pretrained  # noqa
-
-try:
-    from .pz_wrapper import PettingZooWrapper  # noqa
-except ImportError:
-    warnings.warn(
-        "PettingZoo is not installed, so these environments will not be available! To install, run `pip install pettingzoo`"
-    )
-
-try:
-    from .vmas_wrapper import VMASWrapper  # noqa
-except ImportError:
-    warnings.warn(
-        "VMAS is not installed, so these environments will not be available! To install, run `pip install 'vmas[gymnasium]'`"
-    )
 
 
 class GymmaWrapper(MultiAgentEnv):
@@ -48,7 +35,17 @@ class GymmaWrapper(MultiAgentEnv):
         self._obs = None
         self._info = None
 
-        self.longest_action_space = max(self._env.action_space, key=lambda x: x.n)
+        try:
+          self.longest_action_space = max(self._env.action_space, key=lambda x: x.n)
+          self.cont_space = False
+          self.continuous_action_space = False
+        except Exception as e:
+          print('!!! Using continuous action space')
+          self.cont_space = True
+          self.longest_action_space = max(self._env.action_space, key=lambda x: x.shape)
+          self.action_space_min = min(self._env.action_space, key=lambda x: x.low).low
+          self.action_space_max = max(self._env.action_space, key=lambda x: x.high).high
+          self.continuous_action_space = True
         self.longest_observation_space = max(
             self._env.observation_space, key=lambda x: x.shape
         )
@@ -83,7 +80,11 @@ class GymmaWrapper(MultiAgentEnv):
 
     def step(self, actions):
         """Returns obss, reward, terminated, truncated, info"""
-        actions = [int(a) for a in actions]
+        #print(f"!!!!! processing actions: {actions}")
+        if (self.cont_space):
+          actions = [np.array(a) for a in actions]
+        else:
+          actions = [int(a) for a in actions]
         obs, reward, done, truncated, self._info = self._env.step(actions)
         self._obs = self._pad_observation(obs)
 
@@ -129,13 +130,29 @@ class GymmaWrapper(MultiAgentEnv):
     def get_avail_agent_actions(self, agent_id):
         """Returns the available actions for agent_id"""
         valid = flatdim(self._env.action_space[agent_id]) * [1]
-        invalid = [0] * (self.longest_action_space.n - len(valid))
+        if (self.cont_space):
+          invalid = [0] * (self.longest_action_space.shape[0] - len(valid))
+        else:
+          invalid = [0] * (self.longest_action_space.n - len(valid))
         return valid + invalid
 
     def get_total_actions(self):
         """Returns the total number of actions an agent could ever take"""
         # TODO: This is only suitable for a discrete 1 dimensional action space for each agent
         return flatdim(self.longest_action_space)
+
+    def get_env_info(self):
+        env_info = {
+            "state_shape": self.get_state_size(),
+            "obs_shape": self.get_obs_size(),
+            "n_actions": self.get_total_actions(),
+            "n_agents": self.n_agents,
+            "episode_limit": self.episode_limit,
+        }
+        if (self.continuous_action_space):
+          env_info['action_min'] = self.action_space_min
+          env_info['action_max'] = self.action_space_max
+        return env_info
 
     def reset(self, seed=None, options=None):
         """Returns initial observations and info"""

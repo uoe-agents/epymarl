@@ -2,6 +2,7 @@ from functools import partial
 from multiprocessing import Pipe, Process
 
 import numpy as np
+import torch
 
 from components.episode_buffer import EpisodeBatch
 from envs import REGISTRY as env_REGISTRY
@@ -23,10 +24,14 @@ class ParallelRunner:
 
         # registering both smac and smacv2 causes a pysc2 error
         # --> dynamically register the needed env
+        self.continuous_actions = False # By default
         if self.args.env == "sc2":
             register_smac()
         elif self.args.env == "sc2v2":
             register_smacv2()
+        elif self.args.env == "gymma" and 'pz-mpe' in self.args.env_args['key']:
+            print("!!! USING MPE ENVIRONMENT")
+            self.continuous_actions = self.args.env_args['continuous_actions']
 
         env_fn = env_REGISTRY[self.args.env]
         env_args = [self.args.env_args.copy() for _ in range(self.batch_size)]
@@ -137,7 +142,14 @@ class ParallelRunner:
             cpu_actions = actions.to("cpu").numpy()
 
             # Update the actions taken
-            actions_chosen = {"actions": actions.unsqueeze(1)}
+            '''
+                START OF MODIFIED SECTION
+            '''
+            #print(f"!!! PRINTING ACTIONS CHOSEN: {actions}") # tensor([[4]]) in discrete
+            if (actions.type() == torch.LongTensor): # Add a dimension to continuous actions
+                actions_chosen = {"actions": actions.unsqueeze(1)}
+            else:
+                actions_chosen = {"actions": actions}
             self.batch.update(
                 actions_chosen, bs=envs_not_terminated, ts=self.t, mark_filled=False
             )
@@ -153,6 +165,10 @@ class ParallelRunner:
                     action_idx += 1  # actions is not a list over every env
                     if idx == 0 and test_mode and self.args.render:
                         parent_conn.send(("render", None))
+
+            '''
+                END OF MODIFIED SECTION
+            '''
 
             # Update envs_not_terminated
             envs_not_terminated = [

@@ -22,10 +22,10 @@ class PettingZooWrapper(gym.Env):
         self.last_obs = None
 
         self.action_space = Tuple(
-            tuple([self._env.action_spaces[k] for k in self._env.agents])
+            tuple([self._env.action_space(k) for k in self._env.agents])
         )
         self.observation_space = Tuple(
-            tuple([self._env.observation_spaces[k] for k in self._env.agents])
+            tuple([self._env.observation_space(k) for k in self._env.agents])
         )
 
     def reset(self, *args, **kwargs):

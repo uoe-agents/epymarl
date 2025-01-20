@@ -3,7 +3,7 @@ import sys
 
 from .multiagentenv import MultiAgentEnv
 from .gymma import GymmaWrapper
-from .smaclite_wrapper import SMACliteWrapper
+#from .smaclite_wrapper import SMACliteWrapper # Appears to be broken at the moment.
 
 
 if sys.platform == "linux":

@@ -86,7 +86,8 @@ class EpisodeBatch:
 
     def update(self, data, bs=slice(None), ts=slice(None), mark_filled=True):
         slices = self._parse_slices((bs, ts))
-        for k, v in data.items():
+        #print(f"!!! Updating buffer with data: {data}")
+        for k, v in data.items(): # Maps each field to save to its value.
             if k in self.data.transition_data:
                 target = self.data.transition_data
                 if mark_filled:
@@ -246,4 +247,3 @@ class ReplayBuffer(EpisodeBatch):
                                                                         self.buffer_size,
                                                                         self.scheme.keys(),
                                                                         self.groups.keys())
-
