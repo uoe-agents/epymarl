@@ -201,16 +201,19 @@ def run_sequential(args, logger):
         buffer.insert_episode_batch(episode_batch)
 
         if buffer.can_sample(args.batch_size):
-            episode_sample = buffer.sample(args.batch_size)
+            n_updates = args.num_updates_per_rollout
 
-            # Truncate batch to only filled timesteps
-            max_ep_t = episode_sample.max_t_filled()
-            episode_sample = episode_sample[:, :max_ep_t]
+            for _ in range(n_updates):
+                episode_sample = buffer.sample(args.batch_size)
 
-            if episode_sample.device != args.device:
-                episode_sample.to(args.device)
+                # Truncate batch to only filled timesteps
+                max_ep_t = episode_sample.max_t_filled()
+                episode_sample = episode_sample[:, :max_ep_t]
 
-            learner.train(episode_sample, runner.t_env, episode)
+                if episode_sample.device != args.device:
+                    episode_sample.to(args.device)
+
+                learner.train(episode_sample, runner.t_env, episode)
 
         # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
@@ -282,5 +285,18 @@ def args_sanity_check(config, _log):
         config["test_nepisode"] = (
             config["test_nepisode"] // config["batch_size_run"]
         ) * config["batch_size_run"]
+
+    is_pg_alg = config["buffer_size"] <= config["batch_size"]
+    is_parallel = config["runner"] == "parallel"
+    bs_run = config["batch_size_run"]
+    if is_pg_alg and config["num_updates_per_rollout"] > 1:
+        _log.warning("num_updates_per_rollout > 1 should not be used for on-policy algorithms.")
+
+    if (is_parallel and not is_pg_alg and config["num_updates_per_rollout"] < bs_run):
+        _log.warning(
+            f"num_updates_per_rollout ({config['num_updates_per_rollout']}) < batch_size_run ({bs_run}): "
+            f"This updates less frequently than episode_runner would. Set num_updates_per_rollout={bs_run} to match "
+            f"episode_runner update frequency, or use runner='episode' for better sample efficiency."
+        )
 
     return config

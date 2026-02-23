@@ -8,6 +8,7 @@ common_reward: True  # Run experiment with common reward setup
 reward_scalarisation: "sum"  # How to aggregate rewards to single common reward (only used if common_reward is True)
 env_args: {} # Arguments for the environment
 batch_size_run: 1 # Number of environments to run in parallel
+num_updates_per_rollout: 1 # Gradient updates per environment rollout. >1 only useful for off-policy algorithms with large replay buffers.
 test_nepisode: 20 # Number of episodes to test for
 test_interval: 2000 # Test after {} timesteps have passed
 test_greedy: True # Use greedy evaluation (if False, will set epsilon floor to 0

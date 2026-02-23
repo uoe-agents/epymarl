@@ -232,6 +232,16 @@ EPyMARL defines yaml configuration files for algorithms and environments under `
 
 Further environment configs (provided to the main script via `--env-config=...`) can be found in `src/config/envs`. Algorithm configs specifying algorithms and their hyperparameters (provided to the main script via `--config=...`) can be found in `src/config/algs`. To change hyperparameters or define a new algorithm, you can modify these yaml config files or create new ones.
 
+### `num_updates_per_rollout`
+
+The `num_updates_per_rollout` option (default: `1`) controls how many gradient updates are performed after each environment collection phase. For **off-policy, value-based algorithms** (e.g. QMIX, VDN, IQL) that use a large replay buffer, using parallel rollouts with batched updates can greatly improve training speed at the cost of some sample efficiency. 
+
+```sh
+python src/main.py --config=qmix --env-config=smaclite with env_args.time_limit=150 env_args.map_name="MMM" batch_size_run=30 num_updates_per_rollout=30 runner="parallel" 
+```
+
+**Do not use this with policy-gradient algorithms** (MAPPO, IPPO, IA2C, MAA2C, COMA, PAC). Their buffers hold exactly one rollout (`buffer_size == batch_size`), so repeated `sample()` calls return identical data. 
+
 # Run a hyperparameter search
 
 We include a script named `search.py` which reads a search configuration file (e.g. the included `search.config.example.yaml`) and runs a hyperparameter search in one or more tasks. The script can be run using

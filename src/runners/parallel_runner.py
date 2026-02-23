@@ -154,23 +154,19 @@ class ParallelRunner:
                     if idx == 0 and test_mode and self.args.render:
                         parent_conn.send(("render", None))
 
-            # Update envs_not_terminated
-            envs_not_terminated = [
-                b_idx for b_idx, termed in enumerate(terminated) if not termed
-            ]
-            all_terminated = all(terminated)
-            if all_terminated:
-                break
-
             # Post step data we will insert for the current timestep
             post_transition_data = {"reward": [], "terminated": []}
             # Data for the next step we will insert in order to select an action
             pre_transition_data = {"state": [], "avail_actions": [], "obs": []}
 
+            # Track which envs contributed data this step (alive before receive)
+            envs_that_stepped = []
+
             # Receive data back for each unterminated env
             for idx, parent_conn in enumerate(self.parent_conns):
                 if not terminated[idx]:
                     data = parent_conn.recv()
+                    envs_that_stepped.append(idx)
                     # Remaining data for this current timestep
                     post_transition_data["reward"].append((data["reward"],))
 
@@ -194,10 +190,16 @@ class ParallelRunner:
                     pre_transition_data["avail_actions"].append(data["avail_actions"])
                     pre_transition_data["obs"].append(data["obs"])
 
-            # Add post_transiton data into the batch
+            # Recompute envs_not_terminated AFTER receiving new termination flags
+            envs_not_terminated = [
+                b_idx for b_idx, termed in enumerate(terminated) if not termed
+            ]
+            all_terminated = all(terminated)
+
+            # Post-transition data goes to ALL envs that stepped (includes just-terminated)
             self.batch.update(
                 post_transition_data,
-                bs=envs_not_terminated,
+                bs=envs_that_stepped,
                 ts=self.t,
                 mark_filled=False,
             )
@@ -205,10 +207,14 @@ class ParallelRunner:
             # Move onto the next timestep
             self.t += 1
 
-            # Add the pre-transition data
+            # Pre-transition data also goes to all envs that stepped, so their
+            # terminal observations are stored (needed by the learner for target Q)
             self.batch.update(
-                pre_transition_data, bs=envs_not_terminated, ts=self.t, mark_filled=True
+                pre_transition_data, bs=envs_that_stepped, ts=self.t, mark_filled=True
             )
+
+            if all_terminated:
+                break
 
         if not test_mode:
             self.t_env += self.env_steps_this_run

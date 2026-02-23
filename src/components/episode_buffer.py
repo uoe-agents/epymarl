@@ -86,6 +86,7 @@ class EpisodeBatch:
 
     def update(self, data, bs=slice(None), ts=slice(None), mark_filled=True):
         slices = self._parse_slices((bs, ts))
+        slices = tuple(slices)
         for k, v in data.items():
             if k in self.data.transition_data:
                 target = self.data.transition_data
@@ -147,6 +148,7 @@ class EpisodeBatch:
             return ret
         else:
             item = self._parse_slices(item)
+            item = tuple(item)
             new_data = self._new_data_sn()
             for k, v in self.data.transition_data.items():
                 new_data.transition_data[k] = v[item]
