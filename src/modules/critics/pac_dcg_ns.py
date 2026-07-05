@@ -1,6 +1,7 @@
 # code adapted from https://github.com/wendelinboehmer/dcg
 import contextlib
 import itertools
+from copy import deepcopy
 
 import numpy as np
 import torch as th
@@ -64,9 +65,12 @@ class DCGCriticNS:
                 ep_batch.batch_size, self.n_agents, -1
             )
             for i, ag in enumerate(self.agents):
-                self.hidden_states[i] = ag(
-                    agent_inputs[:, i, :], self.hidden_states[i]
-                )[1].view(ep_batch.batch_size, -1)
+                _, self._agent_hidden[i] = ag(
+                    agent_inputs[:, i, :], self._agent_hidden[i]
+                )
+                self.hidden_states[i] = self._extract_recurrent_hidden(
+                    self._agent_hidden[i]
+                )
             # Compute all utility functions
             f_i, f_ij = [], []
             for i, f in enumerate(self.utility_fun):
@@ -278,12 +282,49 @@ class DCGCriticNS:
         )
         self.edges_n_in = self.edges_n_in.float()
 
+    @staticmethod
+    def _extract_recurrent_hidden(hidden):
+        """Return the hidden-state tensor of the last recurrent layer.
+
+        Handles both original agents (hidden is a plain tensor) and custom
+        agents (hidden is list[layer][tuple of tensors]).
+        """
+        if isinstance(hidden, th.Tensor):
+            return hidden
+        for h_tuple in reversed(hidden):
+            if len(h_tuple) > 0:
+                return h_tuple[0]
+        return None
+
+    _ENCODER_FOR_AGENT = {
+        "rnn": "rnn_feat",
+        "rnn_ns": "rnn_feat",
+        "rnn_feat": "rnn_feat",
+    }
+
     def _build_agents(self, input_shape):
-        """Overloads method to build a list of input-encoders for the different agents."""
-        self.agents = [
-            agent_REGISTRY["rnn_feat"](input_shape, self.args)
-            for _ in range(self.n_agents)
-        ]
+        """Build a list of per-agent input encoders.
+
+        Original agents use RNNFeatureAgent; custom agents use a CustomAgent
+        configured with an equivalent encoder architecture.
+        """
+        encoder_key = self._ENCODER_FOR_AGENT.get(self.args.agent)
+        if encoder_key is not None:
+            self.agents = [
+                agent_REGISTRY[encoder_key](input_shape, self.args)
+                for _ in range(self.n_agents)
+            ]
+        else:
+            encoder_args = deepcopy(self.args)
+            encoder_args.agent_arch = [
+                {"type": "linear", "out_features": self.args.hidden_dim, "bias": True},
+                {"type": "relu"},
+                {"type": "gru", "hidden_size": self.args.hidden_dim},
+            ]
+            self.agents = [
+                agent_REGISTRY["custom"](input_shape, encoder_args)
+                for _ in range(self.n_agents)
+            ]
 
     def cuda(self):
         """Overloads methornn_d to make sure all encoders, utilities and payoffs are on the GPU."""
@@ -353,10 +394,23 @@ class DCGCriticNS:
         return inputs
 
     def init_hidden(self, batch_size):
-        """Overloads method to make sure the hidden states of all agents are intialized."""
+        """Initialise hidden states for all per-agent encoders.
+
+        Original encoders return a (1, hidden_dim) tensor that must be
+        expanded to (batch_size, hidden_dim).  Custom encoders accept
+        batch_size directly.
+        """
+        if self.args.agent in self._ENCODER_FOR_AGENT:
+            self._agent_hidden = [
+                ag.init_hidden().expand(batch_size, -1) for ag in self.agents
+            ]
+        else:
+            self._agent_hidden = [
+                ag.init_hidden(batch_size) for ag in self.agents
+            ]
         self.hidden_states = [
-            ag.init_hidden().expand(batch_size, -1) for ag in self.agents
-        ]  # bv
+            self._extract_recurrent_hidden(h) for h in self._agent_hidden
+        ]
 
     def forward(
         self,

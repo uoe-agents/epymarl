@@ -13,7 +13,7 @@ obs_individual_obs: False
 
 # use the maddpg_learner to train
 agent: "rnn_ns"
-mac: "maddpg_mac"
+mac: "non_shared_mac"
 reg: 0.001
 batch_size: 16
 lr: 0.0005

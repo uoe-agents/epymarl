@@ -54,10 +54,7 @@ class QLearner:
             mac_out.append(agent_outs)
             mac_hidden_states.append(self.mac.hidden_states)
         mac_out = th.stack(mac_out, dim=1)  # Concat over time
-        mac_hidden_states = th.stack(mac_hidden_states, dim=1)
-        mac_hidden_states = mac_hidden_states.reshape(
-            batch.batch_size, self.args.n_agents, batch.max_seq_length, -1
-        ).transpose(1, 2)  # btav
+        mac_hidden_states = th.stack(mac_hidden_states, dim=1)  # btav
 
         # Pick the Q-Values for the actions taken by each agent
         chosen_action_qvals = th.gather(mac_out[:, :-1], dim=3, index=actions).squeeze(
@@ -74,11 +71,8 @@ class QLearner:
             target_mac_hidden_states.append(self.target_mac.hidden_states)
 
         # We don't need the first timesteps Q-Value estimate for calculating targets
-        target_mac_out = th.stack(target_mac_out[:], dim=1)  # Concat across time
-        target_mac_hidden_states = th.stack(target_mac_hidden_states, dim=1)
-        target_mac_hidden_states = target_mac_hidden_states.reshape(
-            batch.batch_size, self.args.n_agents, batch.max_seq_length, -1
-        ).transpose(1, 2)  # btav
+        target_mac_out = th.stack(target_mac_out, dim=1)  # Concat across time
+        target_mac_hidden_states = th.stack(target_mac_hidden_states, dim=1)  # btav
 
         # Mask out unavailable actions
         target_mac_out[avail_actions[:, :] == 0] = -9999999  # From OG deepmarl

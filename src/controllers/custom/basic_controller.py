@@ -3,8 +3,13 @@ from components.action_selectors import REGISTRY as action_REGISTRY
 import torch as th
 
 
-# This multi-agent controller shares parameters between agents
-class BasicMAC:
+class CustomBasicMAC:
+    """Multi-agent controller for CustomAgent (shared parameters).
+
+    Hidden states use the custom format: list[layer][tuple of tensors],
+    supporting arbitrary recurrent architectures defined via agent_arch.
+    """
+
     def __init__(self, scheme, groups, args):
         self.n_agents = args.n_agents
         self.args = args
@@ -15,25 +20,29 @@ class BasicMAC:
         action_selector = getattr(args, "action_selector", None)
         self.action_selector = None if action_selector is None else action_REGISTRY[action_selector](args)
 
-        self.hidden_states = None
+        self._hidden_states_flatten = None
+        self._batch_size = None
 
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False):
-        # Only select actions for the selected batch elements in bs
         avail_actions = ep_batch["avail_actions"][:, t_ep]
         agent_outputs = self.forward(ep_batch, t_ep, test_mode=test_mode)
         chosen_actions = self.action_selector.select_action(agent_outputs[bs], avail_actions[bs], t_env, test_mode=test_mode)
         return chosen_actions
 
+    @property
+    def hidden_states(self):
+        if self._hidden_states_flatten is None:
+            return None
+        return self._unflatten_hidden(self._hidden_states_flatten)
+
     def forward(self, ep_batch, t, test_mode=False):
         agent_inputs = self._build_inputs(ep_batch, t)
         avail_actions = ep_batch["avail_actions"][:, t]
-        agent_outs, self.hidden_states = self.agent(agent_inputs, self.hidden_states)
+        agent_outs, self._hidden_states_flatten = self.agent(agent_inputs, self._hidden_states_flatten)
 
-        # Softmax the agent outputs if they're policy logits
         if self.agent_output_type == "pi_logits":
 
             if getattr(self.args, "mask_before_softmax", True):
-                # Make the logits for unavailable actions very negative to minimise their affect on the softmax
                 reshaped_avail_actions = avail_actions.reshape(ep_batch.batch_size * self.n_agents, -1)
                 agent_outs[reshaped_avail_actions == 0] = -1e10
             agent_outs = th.nn.functional.softmax(agent_outs, dim=-1)
@@ -41,7 +50,25 @@ class BasicMAC:
         return agent_outs.view(ep_batch.batch_size, self.n_agents, -1)
 
     def init_hidden(self, batch_size):
-        self.hidden_states = self.agent.init_hidden().unsqueeze(0).expand(batch_size, self.n_agents, -1)  # bav
+        self._batch_size = batch_size
+        expanded = self.expand_hidden_states(self.agent.init_hidden(), batch_size)
+        self._hidden_states_flatten = self._flatten_hidden(expanded)
+
+    def expand_hidden_states(self, hidden_states, batch_size, n_agents=None):
+        """Expand agent-produced hidden states to (batch_size, n_agents, dim)."""
+        n_agents = n_agents if n_agents is not None else self.n_agents
+        return [
+            tuple(x.unsqueeze(0).expand(batch_size, n_agents, -1) for x in h)
+            for h in hidden_states
+        ]
+
+    def _flatten_hidden(self, hidden_states):
+        """(batch, n_agents, dim) -> (batch*n_agents, dim) per recurrent layer."""
+        return [tuple(x.reshape(-1, x.shape[-1]) for x in h) for h in hidden_states]
+
+    def _unflatten_hidden(self, hidden_states):
+        """(batch*n_agents, dim) -> (batch, n_agents, dim) per recurrent layer."""
+        return [tuple(x.reshape(self._batch_size, -1, x.shape[-1]) for x in h) for h in hidden_states]
 
     def parameters(self):
         return self.agent.parameters()
@@ -62,11 +89,9 @@ class BasicMAC:
         self.agent = agent_REGISTRY[self.args.agent](input_shape, self.args)
 
     def _build_inputs(self, batch, t):
-        # Assumes homogenous agents with flat observations.
-        # Other MACs might want to e.g. delegate building inputs to each agent
         bs = batch.batch_size
         inputs = []
-        inputs.append(batch["obs"][:, t])  # b1av
+        inputs.append(batch["obs"][:, t])
         if self.args.obs_last_action:
             if t == 0:
                 inputs.append(th.zeros_like(batch["actions_onehot"][:, t]))

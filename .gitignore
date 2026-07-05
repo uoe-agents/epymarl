@@ -246,3 +246,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/linux,python,windows,pycharm+all,visualstudiocode
+
+3rdparty
+__MACOSX
+results
+wandb

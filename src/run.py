@@ -267,6 +267,45 @@ def run_sequential(args, logger):
     logger.console_logger.info("Finished Training")
 
 
+_MAC_AUTO_RESOLVE = {
+    ("custom", "basic_mac"): "custom_basic_mac",
+    ("custom_ns", "non_shared_mac"): "custom_non_shared_mac",
+    ("custom", "maddpg_mac"): "custom_maddpg_mac",
+}
+
+
+def resolve_mac_for_agent(config, _log):
+    """Auto-select the appropriate MAC based on the agent type."""
+    agent = config.get("agent", "custom")
+    mac = config.get("mac", "basic_mac")
+    learner = config.get("learner", "")
+
+    # MADDPG uses gumbel / target_actions MACs, not the generic non_shared_mac with
+    # action_selector (which MADDPG configs omit).
+    if learner == "maddpg_learner" and mac == "non_shared_mac":
+        if agent == "custom_ns":
+            config["mac"] = "custom_maddpg_ns_mac"
+            _log.info(
+                "Auto-resolved MAC: 'non_shared_mac' -> 'custom_maddpg_ns_mac' "
+                "for MADDPG with custom_ns agent"
+            )
+        elif agent == "rnn_ns":
+            config["mac"] = "maddpg_ns_mac"
+            _log.info(
+                "Auto-resolved MAC: 'non_shared_mac' -> 'maddpg_ns_mac' "
+                "for MADDPG with rnn_ns agent"
+            )
+        return config
+
+    new_mac = _MAC_AUTO_RESOLVE.get((agent, mac))
+    if new_mac is not None:
+        config["mac"] = new_mac
+        _log.info(
+            f"Auto-resolved MAC: '{mac}' -> '{new_mac}' for agent '{agent}'"
+        )
+    return config
+
+
 def args_sanity_check(config, _log):
     # set CUDA flags
     # config["use_cuda"] = True # Use cuda whenever possible!
@@ -282,5 +321,8 @@ def args_sanity_check(config, _log):
         config["test_nepisode"] = (
             config["test_nepisode"] // config["batch_size_run"]
         ) * config["batch_size_run"]
+
+    # Auto-resolve MAC when custom agents are paired with original MAC names.
+    config = resolve_mac_for_agent(config, _log)
 
     return config
