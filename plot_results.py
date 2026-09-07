@@ -7,7 +7,23 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+"""
+Plot results from multiple experiments
+python plot_results.py --path results/sacred --save_dir ./plots --metric return_mean
+cd /home/student/zzq/test/mn/epymarl
 
+python plot_results.py \
+  --path results/sacred \
+  --metric test_return_mean \
+  --include_run_dirs \
+  'mappo/lbforaging:Foraging-2s-10x10-3p-3f-coop-v3/1' \
+  'oracle_mappo/lbforaging_Foraging-2s-10x10-3p-3f-coop-v3/22' \
+  --save_dir plots/local_vs_oracle \
+  --y_min 0 \
+  --y_max 0.75
+To compare specific Sacred runs, pass their directories relative to ``--path``:
+python plot_results.py --path results/sacred --include_run_dirs mappo/env/1 oracle_mappo/env/22
+"""
 
 ALPHA = 0.2
 THRESHOLD_FOR_NUM_ALGS_UNTIL_LEGEND_BELOW_PLOT = 6
@@ -39,6 +55,15 @@ def parse_args():
         nargs="+",
         default=[],
         help="Filter results by environment names. Only showing results for environments that contain any of the specified strings in their names.",
+    )
+    parser.add_argument(
+        "--include_run_dirs",
+        nargs="+",
+        default=[],
+        help=(
+            "Only load these Sacred run directories. Paths may be absolute or "
+            "relative to --path."
+        ),
     )
     parser.add_argument(
         "--save_dir",
@@ -92,13 +117,20 @@ def extract_env_name_from_config(config):
     return f"{env}_{env_name}"
 
 
-def load_results(path, metric):
+def load_results(path, metric, include_run_dirs=None):
     path = Path(path)
+    included = {
+        (Path(run_dir) if Path(run_dir).is_absolute() else path / run_dir).resolve()
+        for run_dir in (include_run_dirs or [])
+    }
     metrics_files = path.glob("**/metrics.json")
 
     # map (env_args, env_name, common_reward, reward_scalarisation) -> alg_name -> config-str -> (config, steps, values)
     data = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for file in metrics_files:
+        if included and file.parent.resolve() not in included:
+            continue
+
         # load json
         with open(file, "r") as f:
             try:
@@ -127,7 +159,11 @@ def load_results(path, metric):
         else:
             warnings.warn(f"Metric {metric} not found in {file} --> skipping")
             continue
-        del config["seed"]
+        config.pop("seed", None)
+        # Some EPyMARL versions copy the seed into env_args while older runs
+        # only store it at the top level. Seeds are repetitions, not distinct
+        # environments, so ignore both locations when grouping curves.
+        config["env_args"].pop("seed", None)
 
         alg_name = extract_alg_name_from_config(config)
         env_name = extract_env_name_from_config(config)
@@ -357,7 +393,7 @@ def plot_results(data, metric, save_dir, y_min, y_max, log_scale):
 
 def main():
     args = parse_args()
-    data = load_results(args.path, args.metric)
+    data = load_results(args.path, args.metric, args.include_run_dirs)
     data = filter_results(data, args.filter_by_algs, args.filter_by_envs)
     data = {
         env_key: {

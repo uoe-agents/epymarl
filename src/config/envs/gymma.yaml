@@ -2,7 +2,7 @@ env: "gymma"
 
 env_args:
   key: null
-  time_limit: 100
+  time_limit: 50
   pretrained_wrapper: null
 
 test_greedy: True

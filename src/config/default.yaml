@@ -49,6 +49,7 @@ agent: "rnn" # Default rnn agent
 hidden_dim: 64 # Size of hidden state for default rnn agent
 obs_agent_id: True # Include the agent's one_hot id in the observation
 obs_last_action: True # Include the agent's last action (one_hot) in the observation
+obs_global_state: False # Include the global state in each agent's observation (Oracle-MAPPO)
 
 # --- Experiment running params ---
 repeat_id: 1

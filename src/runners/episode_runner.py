@@ -13,6 +13,10 @@ class EpisodeRunner:
         self.logger = logger
         self.batch_size = self.args.batch_size_run
         assert self.batch_size == 1
+        self._track_lbf_load = (
+            self.args.env == "gymma"
+            and str(self.args.env_args.get("key", "")).startswith("lbforaging:")
+        )
 
         # registering both smac and smacv2 causes a pysc2 error
         # --> dynamically register the needed env
@@ -73,11 +77,14 @@ class EpisodeRunner:
             episode_return = 0
         else:
             episode_return = np.zeros(self.args.n_agents)
+        load_actions = 0
+        positive_reward_steps = 0
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
             pre_transition_data = {
                 "state": [self.env.get_state()],
+                "global_state": [self.env.get_global_state()],
                 "avail_actions": [self.env.get_avail_actions()],
                 "obs": [self.env.get_obs()],
             }
@@ -89,12 +96,18 @@ class EpisodeRunner:
             actions = self.mac.select_actions(
                 self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode
             )
+            if self._track_lbf_load:
+                load_actions += int(
+                    (actions.detach().cpu().numpy() == (self.args.n_actions - 1)).sum()
+                )
 
             _, reward, terminated, truncated, env_info = self.env.step(actions[0])
             terminated = terminated or truncated
             if test_mode and self.args.render:
                 self.env.render()
             episode_return += reward
+            if np.any(np.asarray(reward) > 0):
+                positive_reward_steps += 1
 
             post_transition_data = {
                 "actions": actions,
@@ -111,6 +124,7 @@ class EpisodeRunner:
 
         last_data = {
             "state": [self.env.get_state()],
+            "global_state": [self.env.get_global_state()],
             "avail_actions": [self.env.get_avail_actions()],
             "obs": [self.env.get_obs()],
         }
@@ -135,6 +149,10 @@ class EpisodeRunner:
         )
         cur_stats["n_episodes"] = 1 + cur_stats.get("n_episodes", 0)
         cur_stats["ep_length"] = self.t + cur_stats.get("ep_length", 0)
+        cur_stats["load_actions"] = cur_stats.get("load_actions", 0) + load_actions
+        cur_stats["positive_reward_steps"] = (
+            cur_stats.get("positive_reward_steps", 0) + positive_reward_steps
+        )
 
         if not test_mode:
             self.t_env += self.t
