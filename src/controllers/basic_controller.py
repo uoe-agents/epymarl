@@ -58,7 +58,32 @@ class BasicMAC:
         self.agent.load_state_dict(th.load("{}/agent.th".format(path), map_location=lambda storage, loc: storage))
 
     def _build_agents(self, input_shape):
-        self.agent = agent_REGISTRY[self.args.agent](input_shape, self.args)
+        if getattr(self.args, "obs_global_state", False):
+            state_dim = int(
+                getattr(self.args, "global_state_shape", self.args.state_shape)
+            )
+            local_dim = input_shape - state_dim
+            # Build a standard Local-MAPPO actor first.  Copying it into the
+            # expanded actor makes Oracle-MAPPO start from exactly the same
+            # policy; the extra global-state columns are learned from zero.
+            # Preserve the RNG position so later modules (notably the critic)
+            # are also initialized identically in same-seed comparisons.
+            local_agent = agent_REGISTRY[self.args.agent](local_dim, self.args)
+            rng_state = th.get_rng_state()
+            self.agent = agent_REGISTRY[self.args.agent](input_shape, self.args)
+            th.set_rng_state(rng_state)
+            if hasattr(self.agent, "fc1") and state_dim <= self.agent.fc1.in_features:
+                with th.no_grad():
+                    self.agent.fc1.weight[:, :local_dim].copy_(local_agent.fc1.weight)
+                    self.agent.fc1.weight[:, -state_dim:] = 0.0
+                    self.agent.fc1.bias.copy_(local_agent.fc1.bias)
+                    for name in ("rnn", "fc2"):
+                        if hasattr(self.agent, name) and hasattr(local_agent, name):
+                            getattr(self.agent, name).load_state_dict(
+                                getattr(local_agent, name).state_dict()
+                            )
+        else:
+            self.agent = agent_REGISTRY[self.args.agent](input_shape, self.args)
 
     def _build_inputs(self, batch, t):
         # Assumes homogenous agents with flat observations.
@@ -73,6 +98,10 @@ class BasicMAC:
                 inputs.append(batch["actions_onehot"][:, t-1])
         if self.args.obs_agent_id:
             inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
+        if getattr(self.args, "obs_global_state", False):
+            # Oracle-MAPPO: expose the full global state to every actor.
+            state = batch["global_state"][:, t]
+            inputs.append(state.unsqueeze(1).expand(-1, self.n_agents, -1))
 
         inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
         return inputs
@@ -83,5 +112,7 @@ class BasicMAC:
             input_shape += scheme["actions_onehot"]["vshape"][0]
         if self.args.obs_agent_id:
             input_shape += self.n_agents
+        if getattr(self.args, "obs_global_state", False):
+            input_shape += scheme.get("global_state", scheme["state"])["vshape"]
 
         return input_shape

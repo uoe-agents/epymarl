@@ -86,7 +86,11 @@ def run(_run, _config, _log):
 
 
 def evaluate_sequential(args, runner):
-    for _ in range(args.test_nepisode):
+    # ``ParallelRunner.run`` evaluates ``batch_size`` episodes at once. Treat
+    # test_nepisode as an episode count, as the periodic evaluation path does,
+    # rather than accidentally multiplying it by batch_size.
+    n_test_runs = max(1, args.test_nepisode // runner.batch_size)
+    for _ in range(n_test_runs):
         runner.run(test_mode=True)
 
     if args.save_replay:
@@ -104,10 +108,12 @@ def run_sequential(args, logger):
     args.n_agents = env_info["n_agents"]
     args.n_actions = env_info["n_actions"]
     args.state_shape = env_info["state_shape"]
+    args.global_state_shape = env_info.get("global_state_shape", env_info["state_shape"])
 
     # Default/Base scheme
     scheme = {
         "state": {"vshape": env_info["state_shape"]},
+        "global_state": {"vshape": env_info.get("global_state_shape", env_info["state_shape"])},
         "obs": {"vshape": env_info["obs_shape"], "group": "agents"},
         "actions": {"vshape": (1,), "group": "agents", "dtype": th.long},
         "avail_actions": {
@@ -136,6 +142,14 @@ def run_sequential(args, logger):
 
     # Setup multiagent controller here
     mac = mac_REGISTRY[args.mac](buffer.scheme, groups, args)
+    if getattr(args, "obs_global_state", False):
+        logger.console_logger.info(
+            "Oracle actor input: obs=%s + agent_id=%s + global_state=%s => %s",
+            env_info["obs_shape"],
+            args.n_agents,
+            args.global_state_shape,
+            mac.agent.fc1.in_features,
+        )
 
     # Give runner the scheme
     runner.setup(scheme=scheme, groups=groups, preprocess=preprocess, mac=mac)

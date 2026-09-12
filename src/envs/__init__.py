@@ -4,6 +4,7 @@ import sys
 from .multiagentenv import MultiAgentEnv
 from .gymma import GymmaWrapper
 from .smaclite_wrapper import SMACliteWrapper
+from .switching_lbf import register_switching_lbf
 
 
 if sys.platform == "linux":
@@ -36,6 +37,7 @@ def gymma_fn(**kwargs) -> MultiAgentEnv:
 REGISTRY = {}
 REGISTRY["smaclite"] = smaclite_fn
 REGISTRY["gymma"] = gymma_fn
+register_switching_lbf()
 
 
 # registering both smac and smacv2 causes a pysc2 error

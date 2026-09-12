@@ -18,9 +18,21 @@ class MultiAgentEnv(object):
     def get_state(self):
         raise NotImplementedError
 
+    def get_global_state(self):
+        """Returns the optional full state used by Oracle-MAPPO actors.
+
+        Environments without a separate global representation keep the
+        historical state as the global state as well.
+        """
+        return self.get_state()
+
     def get_state_size(self):
         """Returns the shape of the state"""
         raise NotImplementedError
+
+    def get_global_state_size(self):
+        """Returns the shape of the optional global state."""
+        return self.get_state_size()
 
     def get_avail_actions(self):
         raise NotImplementedError
@@ -53,6 +65,7 @@ class MultiAgentEnv(object):
     def get_env_info(self):
         env_info = {
             "state_shape": self.get_state_size(),
+            "global_state_shape": self.get_global_state_size(),
             "obs_shape": self.get_obs_size(),
             "n_actions": self.get_total_actions(),
             "n_agents": self.n_agents,

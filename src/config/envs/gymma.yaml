@@ -2,8 +2,11 @@ env: "gymma"
 
 env_args:
   key: null
-  time_limit: 100
+  time_limit: 50
   pretrained_wrapper: null
+  initial_mode_ids: null
+  switch_mode_ids: null
+  fixed_switch_step: null
 
 test_greedy: True
 test_nepisode: 100

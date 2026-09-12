@@ -116,6 +116,14 @@ class PPOLearner:
             grad_norm = th.nn.utils.clip_grad_norm_(
                 self.agent_params, self.args.grad_norm_clip
             )
+            oracle_global_grad_norm = None
+            if getattr(self.args, "obs_global_state", False):
+                fc1_grad = getattr(getattr(self.mac, "agent", None), "fc1", None)
+                if fc1_grad is not None and fc1_grad.weight.grad is not None:
+                    state_dim = int(
+                        getattr(self.args, "global_state_shape", self.args.state_shape)
+                    )
+                    oracle_global_grad_norm = fc1_grad.weight.grad[:, -state_dim:].norm().item()
             self.agent_optimiser.step()
 
         self.old_mac.load_state(self.mac)
@@ -152,6 +160,10 @@ class PPOLearner:
             )
             self.logger.log_stat("pg_loss", pg_loss.item(), t_env)
             self.logger.log_stat("agent_grad_norm", grad_norm.item(), t_env)
+            if oracle_global_grad_norm is not None:
+                self.logger.log_stat(
+                    "oracle_global_grad_norm", oracle_global_grad_norm, t_env
+                )
             self.logger.log_stat(
                 "pi_max",
                 (pi.max(dim=-1)[0] * mask).sum().item() / mask.sum().item(),

@@ -108,7 +108,9 @@ modules.xml
 __pycache__/
 *.py[cod]
 *$py.class
-
+# Experiment outputs
+plots/
+results/
 # C extensions
 *.so
 
@@ -246,3 +248,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/linux,python,windows,pycharm+all,visualstudiocode
+# Experiment outputs
+plots/
+results/

@@ -5,6 +5,13 @@ import numpy as np
 from components.episode_buffer import EpisodeBatch
 from envs import REGISTRY as env_REGISTRY
 from envs import register_smac, register_smacv2
+from runners.switching_metrics import (
+    SWITCH_STATS_PREFIX,
+    SwitchingEpisodeMetrics,
+    add_switching_stats,
+    is_lbf_env_key,
+    log_switching_stats,
+)
 
 
 class EpisodeRunner:
@@ -13,6 +20,16 @@ class EpisodeRunner:
         self.logger = logger
         self.batch_size = self.args.batch_size_run
         assert self.batch_size == 1
+        self._track_lbf_load = (
+            self.args.env == "gymma"
+            and is_lbf_env_key(self.args.env_args.get("key", ""))
+        )
+        self._track_switching_metrics = (
+            self.args.env == "gymma"
+            and str(self.args.env_args.get("key", "")).startswith(
+                "epymarl/Switching-LBF"
+            )
+        )
 
         # registering both smac and smacv2 causes a pysc2 error
         # --> dynamically register the needed env
@@ -73,11 +90,15 @@ class EpisodeRunner:
             episode_return = 0
         else:
             episode_return = np.zeros(self.args.n_agents)
+        load_actions = 0
+        positive_reward_steps = 0
+        switching_metrics = SwitchingEpisodeMetrics()
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
             pre_transition_data = {
                 "state": [self.env.get_state()],
+                "global_state": [self.env.get_global_state()],
                 "avail_actions": [self.env.get_avail_actions()],
                 "obs": [self.env.get_obs()],
             }
@@ -89,12 +110,20 @@ class EpisodeRunner:
             actions = self.mac.select_actions(
                 self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode
             )
+            if self._track_lbf_load:
+                load_actions += int(
+                    (actions.detach().cpu().numpy() == (self.args.n_actions - 1)).sum()
+                )
 
             _, reward, terminated, truncated, env_info = self.env.step(actions[0])
             terminated = terminated or truncated
             if test_mode and self.args.render:
                 self.env.render()
             episode_return += reward
+            if np.any(np.asarray(reward) > 0):
+                positive_reward_steps += 1
+            if self._track_switching_metrics:
+                switching_metrics.observe(reward, env_info)
 
             post_transition_data = {
                 "actions": actions,
@@ -111,6 +140,7 @@ class EpisodeRunner:
 
         last_data = {
             "state": [self.env.get_state()],
+            "global_state": [self.env.get_global_state()],
             "avail_actions": [self.env.get_avail_actions()],
             "obs": [self.env.get_obs()],
         }
@@ -135,6 +165,12 @@ class EpisodeRunner:
         )
         cur_stats["n_episodes"] = 1 + cur_stats.get("n_episodes", 0)
         cur_stats["ep_length"] = self.t + cur_stats.get("ep_length", 0)
+        cur_stats["load_actions"] = cur_stats.get("load_actions", 0) + load_actions
+        cur_stats["positive_reward_steps"] = (
+            cur_stats.get("positive_reward_steps", 0) + positive_reward_steps
+        )
+        if self._track_switching_metrics:
+            add_switching_stats(cur_stats, switching_metrics)
 
         if not test_mode:
             self.t_env += self.t
@@ -178,8 +214,10 @@ class EpisodeRunner:
             )
         returns.clear()
 
+        log_switching_stats(self.logger, stats, prefix, self.t_env)
+
         for k, v in stats.items():
-            if k != "n_episodes":
+            if k != "n_episodes" and not k.startswith(SWITCH_STATS_PREFIX):
                 self.logger.log_stat(
                     prefix + k + "_mean", v / stats["n_episodes"], self.t_env
                 )
