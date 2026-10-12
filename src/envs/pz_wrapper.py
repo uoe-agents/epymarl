@@ -1,5 +1,6 @@
 from pathlib import Path
 import importlib
+import re
 
 import gymnasium as gym
 from gymnasium.spaces import Tuple
@@ -67,8 +68,15 @@ class PettingZooWrapper(gym.Env):
         return self._env.close()
 
 
-# import all files within the pettingzoo library that match "**/*_v?.py" underneath library of pettingzoo
-envs = Path(pettingzoo.__path__[0]).glob("**/*_v?.py")
+# Import all files within the pettingzoo library that look like environment
+# modules (`<name>_v<version>.py`). The version may have several digits, e.g.
+# `knights_archers_zombies_v11.py`, so a single-character glob (`*_v?.py`)
+# silently dropped these envs.
+envs = (
+    p
+    for p in Path(pettingzoo.__path__[0]).rglob("*.py")
+    if re.search(r"_v\d+\.py$", p.name)
+)
 for e in envs:
     name = e.stem.replace("_", "-")
     lib = e.parent.stem
