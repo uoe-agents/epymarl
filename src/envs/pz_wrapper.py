@@ -34,8 +34,10 @@ class PettingZooWrapper(gym.Env):
         self.last_obs = obs
         return obs, info
 
-    def render(self, mode="human"):
-        return self._env.render(mode)
+    def render(self):
+        # PettingZoo envs take no arguments in render(), the render mode is set
+        # on construction (e.g. by adding `render_mode` to `env_args`)
+        return self._env.render()
 
     def step(self, actions):
         dict_actions = {}

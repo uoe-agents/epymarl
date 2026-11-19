@@ -104,7 +104,7 @@ class GymmaWrapper(MultiAgentEnv):
 
     def get_obs_agent(self, agent_id):
         """Returns observation for agent_id"""
-        raise self._obs[agent_id]
+        return self._obs[agent_id]
 
     def get_obs_size(self):
         """Returns the shape of the observation"""
