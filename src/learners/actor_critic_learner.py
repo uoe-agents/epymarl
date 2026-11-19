@@ -207,7 +207,10 @@ class ActorCriticLearner:
                     nstep_return_t += self.args.gamma**step * values[:, t] * mask[:, t]
                 elif t == rewards.size(1) - 1 and self.args.add_value_last_step:
                     nstep_return_t += self.args.gamma**step * rewards[:, t] * mask[:, t]
-                    nstep_return_t += self.args.gamma ** (step + 1) * values[:, t + 1]
+                    # only bootstrap if the episode is still running at the last step
+                    nstep_return_t += (
+                        self.args.gamma ** (step + 1) * values[:, t + 1] * mask[:, t]
+                    )
                 else:
                     nstep_return_t += self.args.gamma**step * rewards[:, t] * mask[:, t]
             nstep_values[:, t_start, :] = nstep_return_t
